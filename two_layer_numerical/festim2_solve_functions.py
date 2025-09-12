@@ -3,7 +3,10 @@ import numpy as np
 
 my_model = F.HydrogenTransportProblemDiscontinuous()
 
-points = np.concatenate((np.linspace(0, 3e-6, 100), np.linspace(3e-6, 3e-3, 100)))
+barrier_thickness = 3e-6  # m
+substrate_thickness = 3e-3  # m
+
+points = np.concatenate((np.linspace(0, barrier_thickness, 100), np.linspace(barrier_thickness, substrate_thickness, 100)))
 my_model.mesh = F.Mesh1D(vertices=points)
 
 params = {
@@ -22,16 +25,25 @@ params = {
 }
 
 tungsten = F.Material(
-    D_0=1e-8, E_D=0.39, K_S_0=1e22, E_K_S=1.04, solubility_law="sieverts"
-)
-stainless_steel = F.Material(
-    D_0=4.1e-7, E_D=0.39, K_S_0=1.87e24, E_K_S=1.04, solubility_law="sieverts"
+    D_0=params["D_0_barrier"],
+    E_D=params["E_D_barrier"],
+    K_S_0=params["S_0_barrier"],
+    E_K_S=params["E_S_barrier"],
+    solubility_law="sieverts",
 )
 
-barrier = F.VolumeSubdomain1D(id=1, material=tungsten, borders=[0, 3e-6])
-substrate = F.VolumeSubdomain1D(id=2, material=stainless_steel, borders=[3e-6, 3e-3])
+stainless_steel = F.Material(
+    D_0=params["D_0_substrate"],
+    E_D=params["E_D_substrate"],
+    K_S_0=params["S_0_substrate"],
+    E_K_S=params["E_S_substrate"],
+    solubility_law="sieverts",
+)
+
+barrier = F.VolumeSubdomain1D(id=1, material=tungsten, borders=[0, barrier_thickness])
+substrate = F.VolumeSubdomain1D(id=2, material=stainless_steel, borders=[barrier_thickness, substrate_thickness])
 left = F.SurfaceSubdomain1D(id=3, x=0)
-right = F.SurfaceSubdomain1D(id=4, x=3e-3)
+right = F.SurfaceSubdomain1D(id=4, x=substrate_thickness)
 interface = F.Interface(id=5, subdomains=[barrier, substrate], penalty_term=1e12)
 
 my_model.interfaces = [interface]
