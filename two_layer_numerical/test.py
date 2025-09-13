@@ -1,9 +1,8 @@
 import festim as F
 import numpy as np
+import matplotlib.pyplot as plt
 
-print(f"FESTIM version: {F.__version__}")
-
-my_model = F.HydrogenTransportProblemDiscontinuous()
+my_model = F.HydrogenTransportProblem()
 
 barrier_thickness = 3e-6  # m
 substrate_thickness = 3e-3  # m
@@ -42,6 +41,11 @@ stainless_steel = F.Material(
     solubility_law="sieverts",
 )
 
+# my_model.mesh = F.Mesh1D(vertices=np.linspace(0, 7e-6, num=1001))
+# mat = F.Material(D_0=1e-7, E_D=0.2)
+
+my_model.mesh = F.Mesh1D(vertices=points)
+
 barrier = F.VolumeSubdomain1D(id=1, material=tungsten, borders=[0, barrier_thickness])
 substrate = F.VolumeSubdomain1D(id=2, material=stainless_steel, borders=[barrier_thickness, substrate_thickness])
 left = F.SurfaceSubdomain1D(id=3, x=0)
@@ -59,13 +63,8 @@ my_model.subdomains = [
 H = F.Species(name="H", mobile=True, subdomains=[barrier, substrate])
 my_model.species = [H]
 
-
-my_model.surface_to_volume = {
-    left: barrier,
-    right: substrate,
-}
-
 my_model.temperature = 600
+
 
 my_model.boundary_conditions = [
     F.SievertsBC(
@@ -74,11 +73,8 @@ my_model.boundary_conditions = [
     F.FixedConcentrationBC(subdomain=right, value=0, species=H),
 ]
 
-my_model.settings = F.Settings(
-    atol=1e-6,
-    rtol=1e-10,
-    transient=False,
-)
+
+my_model.settings = F.Settings(atol=1e10, rtol=1e-10, transient=False)  # s
 
 class ProfileExport(F.VolumeQuantity):
 
@@ -87,36 +83,31 @@ class ProfileExport(F.VolumeQuantity):
 
         self.data.append(profile)
 
-barrier_profile = ProfileExport(field=H, volume=barrier)
 
-substrate_profile = ProfileExport(field=H, volume=substrate)
+profile1 = ProfileExport(field=H, volume=barrier)
 
-
-# barrier_export = F.Profile1DExport(
-#     field=H,
-#     subdomain=barrier,
-# )
-# substrate_export = F.Profile1DExport(
-#     field=H,
-#     subdomain=substrate,
-# )
+profile2 = ProfileExport(field=H, volume=barrier)
 
 my_model.exports = [
-    F.VTXSpeciesExport(
-        filename="results/two_layer_barrier.bp",
+    F.XDMFExport(
         field=H,
-        subdomain=barrier,
+        filename="results/hydrogen_concentration.xdmf",
     ),
-    F.VTXSpeciesExport(
-        filename="results/two_layer_substrate.bp",
-        field=H,
-        subdomain=substrate,
-    ),
-    barrier_profile,
-    substrate_profile,
+    profile1,
+    profile2
 ]
-
-
-
 my_model.initialise()
+
 my_model.run()
+
+
+x = my_model.mesh.mesh.geometry.x[:, 0]
+data = profile1.data
+
+print(type(data), len(data), data[0].shape)
+print(data)
+print(type(x), len(x), x.shape)
+print(x)
+
+plt.plot(x, data[0])
+plt.show()
