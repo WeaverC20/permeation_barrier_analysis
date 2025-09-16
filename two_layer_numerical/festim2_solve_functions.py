@@ -1,5 +1,6 @@
 import festim as F
 import numpy as np
+import matplotlib.pyplot as plt
 
 def create_mesh(my_model, barrier_thickness, substrate_thickness):
     """
@@ -119,3 +120,16 @@ def compute_W_R(params, barrier_thick, substrate_thick, T, P_up):
     R = K_d_substrate / K_d_barrier
 
     return W, R
+
+def plot_concentration_profile(my_model, barrier_export, substrate_export, results_folder="results"):
+    """
+    plots the concentration profile from the exports
+    """
+    c_array = np.concatenate((barrier_export.data[0], substrate_export.data[0]))
+    points = np.concatenate((my_model.mesh.vertices[:100], my_model.mesh.vertices[99:]))
+
+    plt.plot(points, c_array)
+    plt.xlabel("x (m)")
+    plt.ylabel("Mobile concentration (H/m3)")
+    plt.title("Concentration profile")
+    plt.show()
