@@ -92,3 +92,30 @@ def set_exports(my_model, barrier, substrate, H, results_folder="results"):
     ]
 
     return barrier_export, substrate_export
+
+def compute_W_R(params, barrier_thick, substrate_thick, T, P_up):
+    """
+    computes the dimensionless quantities W and R from the given parameters
+    """
+    k_B = 8.617333262145e-5  # eV/K
+
+    D_barrier = params['D_0_barrier'] * np.exp(-params['E_D_barrier']/(k_B * T))
+    D_substrate = params['D_0_substrate'] * np.exp(-params['E_D_substrate']/(k_B * T))
+
+    S_barrier = params['S_0_barrier'] * np.exp(-params['E_S_barrier']/(2 * k_B * T))
+    S_substrate = params['S_0_substrate'] * np.exp(-params['E_S_substrate']/(2 * k_B * T))
+
+    K_r_barrier = params['K_r_0_barrier'] * np.exp(-params['E_K_r_barrier']/(k_B * T))
+    K_d_barrier = K_r_barrier * S_barrier ** 2
+
+    K_r_substrate = params['K_r_0_substrate'] * np.exp(-params['E_K_r_substrate']/(k_B * T))
+    K_d_substrate = K_r_substrate * S_substrate ** 2
+
+    W = K_d_barrier * P_up ** 0.5 * (
+        barrier_thick / (D_barrier * S_barrier) +
+        substrate_thick / (D_substrate * S_substrate)
+        )
+    
+    R = K_d_substrate / K_d_barrier
+
+    return W, R
