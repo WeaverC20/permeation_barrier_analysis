@@ -4,3 +4,5 @@
 *.pyc
 *.pdf
 *.svg
+*.bp
+*.txt
