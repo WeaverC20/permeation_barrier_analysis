@@ -6,7 +6,7 @@ def create_mesh(my_model, barrier_thickness, substrate_thickness):
     """
     creates a 1D mesh for the two-layer model with 100 elements in each layer
     """
-    points = np.concatenate((np.linspace(0, barrier_thickness, 100), np.linspace(barrier_thickness, substrate_thickness, 100)))
+    points = np.concatenate((np.linspace(0, barrier_thickness, 100), np.linspace(barrier_thickness, barrier_thickness + substrate_thickness, 100)))
     my_model.mesh = F.Mesh1D(vertices=points)
 
 def assign_materials_and_domains(my_model, params, barrier_thickness, substrate_thickness, T=500, P_up=100):
@@ -29,9 +29,9 @@ def assign_materials_and_domains(my_model, params, barrier_thickness, substrate_
     )
 
     barrier = F.VolumeSubdomain1D(id=1, material=mat1, borders=[0, barrier_thickness])
-    substrate = F.VolumeSubdomain1D(id=2, material=mat2, borders=[barrier_thickness, substrate_thickness])
+    substrate = F.VolumeSubdomain1D(id=2, material=mat2, borders=[barrier_thickness, barrier_thickness + substrate_thickness])
     left = F.SurfaceSubdomain1D(id=3, x=0)
-    right = F.SurfaceSubdomain1D(id=4, x=substrate_thickness)
+    right = F.SurfaceSubdomain1D(id=4, x=barrier_thickness + substrate_thickness)
     interface = F.Interface(id=5, subdomains=[barrier, substrate], penalty_term=1e17)
 
     my_model.interfaces = [interface]
