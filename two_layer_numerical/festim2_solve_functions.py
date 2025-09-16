@@ -26,15 +26,14 @@ params = {
     "E_K_r_substrate": 15600 / 96491,  # converting to eV from F. WAELBROECK et al
 }
 
-tungsten = F.Material(
+mat1 = F.Material(
     D_0=params["D_0_barrier"],
     E_D=params["E_D_barrier"],
     K_S_0=params["S_0_barrier"],
     E_K_S=params["E_S_barrier"],
     solubility_law="sieverts",
 )
-
-stainless_steel = F.Material(
+mat2 = F.Material(
     D_0=params["D_0_substrate"],
     E_D=params["E_D_substrate"],
     K_S_0=params["S_0_substrate"],
@@ -42,11 +41,11 @@ stainless_steel = F.Material(
     solubility_law="sieverts",
 )
 
-barrier = F.VolumeSubdomain1D(id=1, material=tungsten, borders=[0, barrier_thickness])
-substrate = F.VolumeSubdomain1D(id=2, material=stainless_steel, borders=[barrier_thickness, substrate_thickness])
+barrier = F.VolumeSubdomain1D(id=1, material=mat1, borders=[0, barrier_thickness])
+substrate = F.VolumeSubdomain1D(id=2, material=mat2, borders=[barrier_thickness, substrate_thickness])
 left = F.SurfaceSubdomain1D(id=3, x=0)
 right = F.SurfaceSubdomain1D(id=4, x=substrate_thickness)
-interface = F.Interface(id=5, subdomains=[barrier, substrate], penalty_term=1e12)
+interface = F.Interface(id=5, subdomains=[barrier, substrate], penalty_term=1e17)
 
 my_model.interfaces = [interface]
 my_model.subdomains = [
@@ -67,10 +66,13 @@ my_model.surface_to_volume = {
 
 my_model.temperature = 600
 
+sieverts_bc = F.SievertsBC(
+    subdomain=left, S_0=mat1.K_S_0, E_S=mat1.E_K_S, pressure=100, species=H
+)
+
+
 my_model.boundary_conditions = [
-    F.SievertsBC(
-        subdomain=left, S_0=tungsten.K_S_0, E_S=tungsten.E_K_S, pressure=100, species=H
-    ),
+    sieverts_bc,
     F.FixedConcentrationBC(subdomain=right, value=0, species=H),
 ]
 
@@ -80,26 +82,14 @@ my_model.settings = F.Settings(
     transient=False,
 )
 
-class ProfileExport(F.VolumeQuantity):
-
-    def compute(self):
-        profile = self.field.solution.x.array[:].copy()
-
-        self.data.append(profile)
-
-barrier_profile = ProfileExport(field=H, volume=barrier)
-
-substrate_profile = ProfileExport(field=H, volume=substrate)
-
-
-# barrier_export = F.Profile1DExport(
-#     field=H,
-#     subdomain=barrier,
-# )
-# substrate_export = F.Profile1DExport(
-#     field=H,
-#     subdomain=substrate,
-# )
+barrier_export = F.Profile1DExport(
+    field=H,
+    subdomain=barrier,
+)
+substrate_export = F.Profile1DExport(
+    field=H,
+    subdomain=substrate,
+)
 
 my_model.exports = [
     F.VTXSpeciesExport(
@@ -112,11 +102,13 @@ my_model.exports = [
         field=H,
         subdomain=substrate,
     ),
-    barrier_profile,
-    substrate_profile,
+    barrier_export,
+    substrate_export,
 ]
-
-
 
 my_model.initialise()
 my_model.run()
+
+
+print(f"{barrier_export.data[0][-1]:.2e}")
+print(f"{substrate_export.data[0][0]:.2e}")
