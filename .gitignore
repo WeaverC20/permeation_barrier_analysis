@@ -6,3 +6,6 @@
 *.svg
 *.bp
 *.txt
+*.0
+*.idx
+*.json
