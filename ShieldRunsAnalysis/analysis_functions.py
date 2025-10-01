@@ -3,6 +3,7 @@ import numpy as np
 import os
 from datetime import datetime
 import pandas as pd
+import csv
 
 def fit_linear_asymptote(x, y, tail_frac=0.25, tol=0.08):
     """Fit a linear asymptote to the final section of (x, y).
@@ -63,9 +64,56 @@ def load_downstream_data(filepath):
 
     return time_s, df
 
-def voltage_to_Pa_wasp(voltage):
+def voltage_to_torr_wasp_downstream(voltage):
     """Convert Wasp voltage to pressure in Pa."""
     # Calibration from manual
     indicated_pressure = 10**((voltage - 5.5)/0.5)
 
-    return np[P if P >=1e-5 else P * 2.4 for P in indicated_pressure]
+    return np.array([P if P >=1e-5 else P * 2.4 for P in indicated_pressure])
+
+def voltage_to_torr_wasp_upstream(voltage):
+    """Convert Wasp voltage to pressure in Torr."""
+    # Calibration from manual
+
+
+def write_run_to_csv(csv_filename, run_name, material, temperature_c, diffusivity, permeability):
+    """
+    Writes run info into the CSV file.
+    If the run already exists (based on run_name), its row is updated.
+    Otherwise, a new row is appended.
+    """
+    rows = []
+    headers = ["Run Name", "Material", "Temperature (K)", "Diffusivity", "Permeability"]
+    file_exists = os.path.isfile(csv_filename)
+
+    # Load existing rows if file exists
+    if file_exists:
+        with open(csv_filename, mode="r", newline="") as f:
+            reader = csv.DictReader(f)
+            rows = list(reader)
+
+    # Check if run_name already exists and update, otherwise append
+    updated = False
+    for row in rows:
+        if row["Run Name"] == run_name:
+            row["Material"] = material
+            row["Temperature (K)"] = temperature_c
+            row["Diffusivity"] = diffusivity
+            row["Permeability"] = permeability
+            updated = True
+            break
+
+    if not updated:
+        rows.append({
+            "Run Name": run_name,
+            "Material": material,
+            "Temperature (K)": temperature_c,
+            "Diffusivity": diffusivity,
+            "Permeability": permeability
+        })
+
+    # Rewrite the file with headers + updated rows
+    with open(csv_filename, mode="w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=headers)
+        writer.writeheader()
+        writer.writerows(rows)
