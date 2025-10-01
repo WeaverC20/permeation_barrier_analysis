@@ -10,3 +10,4 @@
 *.idx
 *.json
 *.png
+*__pychache__/
