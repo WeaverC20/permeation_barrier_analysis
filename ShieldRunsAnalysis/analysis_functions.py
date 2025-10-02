@@ -71,10 +71,58 @@ def voltage_to_torr_wasp_downstream(voltage):
 
     return np.array([P if P >=1e-5 else P * 2.4 for P in indicated_pressure])
 
-def voltage_to_torr_wasp_upstream(voltage):
+def voltage_to_torr_baratron(voltage):
     """Convert Wasp voltage to pressure in Torr."""
     # Calibration from manual
+    return np.array(voltage * 100)
 
+def average_pressure_after_increase(time, pressure, window=5, slope_threshold=1e-3):
+    """
+    Detects when the pressure stabilizes after a sudden increase and 
+    returns the average pressure after that time.
+
+    Parameters
+    ----------
+    time : array-like
+        Time values (seconds).
+    pressure : array-like
+        Pressure values corresponding to time.
+    window : int, optional
+        Number of points to use for local slope estimation (default=5).
+    slope_threshold : float, optional
+        Threshold for determining when slope is "flat" (default=1e-3).
+
+    Returns
+    -------
+    avg_pressure : float
+        Average pressure after the increase.
+    t_start : float
+        Detected time when pressure flattens.
+    """
+
+    time = np.asarray(time)
+    pressure = np.asarray(pressure)
+
+    # Estimate slope using central differences
+    slopes = np.gradient(pressure, time)
+
+    # Smooth slope with rolling average
+    smooth_slopes = np.convolve(slopes, np.ones(window)/window, mode='same')
+
+    # Find first time slope falls below threshold after the jump
+    for i in range(len(smooth_slopes)):
+        if abs(smooth_slopes[i]) < slope_threshold and time[i] > min(time) + 5:
+            # treat this as the "settled" point
+            settled_index = i
+            break
+    else:
+        settled_index = int(0.5*len(time))  # fallback: halfway
+
+    # Compute average after that point
+    avg_pressure = np.mean(pressure[settled_index:])
+    # t_start = time[settled_index]
+
+    return avg_pressure
 
 def write_run_to_csv(csv_filename, run_name, material, temperature_c, diffusivity, permeability):
     """
