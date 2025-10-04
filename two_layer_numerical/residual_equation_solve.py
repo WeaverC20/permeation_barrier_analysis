@@ -18,6 +18,7 @@ Kr2 = 2.4e-33
 
 S1 = float((Kd1 / Kr1) ** 0.5)
 S2 = float((Kd2 / Kr2) ** 0.5)
+print(S2)
 gamma = S2 / S1
 
 # --- Natural scales ---
