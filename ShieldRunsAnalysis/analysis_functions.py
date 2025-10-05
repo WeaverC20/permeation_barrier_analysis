@@ -79,7 +79,7 @@ def voltage_to_torr_baratron(voltage):
 def average_pressure_after_increase(time, pressure, window=5, slope_threshold=1e-3):
     """
     Detects when the pressure stabilizes after a sudden increase and 
-    returns the average pressure after that time.
+    returns the average pressure after that time in torr.
 
     Parameters
     ----------
