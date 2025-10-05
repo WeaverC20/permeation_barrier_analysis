@@ -4,6 +4,8 @@ import os
 from datetime import datetime
 import pandas as pd
 import csv
+from uncertainties import ufloat
+import re
 
 def fit_linear_asymptote(x, y, tail_frac=0.25, tol=0.08):
     """Fit a linear asymptote to the final section of (x, y).
@@ -165,3 +167,24 @@ def write_run_to_csv(csv_filename, run_name, material, temperature_c, diffusivit
         writer = csv.DictWriter(f, fieldnames=headers)
         writer.writeheader()
         writer.writerows(rows)
+
+
+def parse_ufloat(value):
+    """
+    Parse a value like '(8.9+/-1.0)e+08' or '3.4e-12' into a ufloat or float.
+    """
+    if isinstance(value, str):
+        # Match (val+/-err)e+exp or similar formats
+        match = re.match(r"\(?([0-9.\-eE]+)\+/-([0-9.\-eE]+)\)?(?:e([+\-]?[0-9]+))?", value.strip())
+        if match:
+            val = float(match.group(1))
+            err = float(match.group(2))
+            exp = int(match.group(3)) if match.group(3) else 0
+            return ufloat(val * 10**exp, err * 10**exp)
+        else:
+            # Try a simple float fallback
+            try:
+                return float(value)
+            except ValueError:
+                return None
+    return value  # already numeric
