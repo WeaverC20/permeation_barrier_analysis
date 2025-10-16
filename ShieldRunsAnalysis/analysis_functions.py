@@ -73,10 +73,15 @@ def voltage_to_torr_wasp_downstream(voltage):
 
     return np.array([P if P >=1e-5 else P * 2.4 for P in indicated_pressure])
 
-def voltage_to_torr_baratron(voltage):
+def voltage_to_torr_baratron_upstream(voltage):
     """Convert Wasp voltage to pressure in Torr."""
     # Calibration from manual
     return np.array(voltage * 100)
+
+def voltage_to_torr_baratron_downstream(voltage):
+    """Convert Wasp voltage to pressure in Torr."""
+    # Calibration from manual
+    return np.array(voltage * 100 / 1000)
 
 def average_pressure_after_increase(time, pressure, window=5, slope_threshold=1e-3):
     """
