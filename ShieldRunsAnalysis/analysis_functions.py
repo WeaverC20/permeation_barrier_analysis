@@ -7,7 +7,7 @@ import csv
 from uncertainties import ufloat
 import re
 
-def fit_linear_asymptote(x, y, tail_frac=0.25, tol=0.08):
+def fit_linear_asymptote(x, y, tail_frac=0.25):
     """Fit a linear asymptote to the final section of (x, y).
 
     Returns (slope, intercept, start_index_used).
@@ -19,29 +19,13 @@ def fit_linear_asymptote(x, y, tail_frac=0.25, tol=0.08):
     if x.size < 5:
         raise ValueError("need at least 5 points to fit an asymptote")
 
-    g = np.gradient(y, x)
     n = len(x)
     tail_start = max(0, int(n * (1 - tail_frac)))
-    tail_g = g[tail_start:]
 
-    med = np.median(tail_g)
-    if med == 0:
-        med = np.mean(tail_g) or 1e-12
-
-    rel_ok = np.abs((tail_g - med) / (med if med != 0 else 1e-12)) <= tol
-
-    use_rel_idx = None
-    for i in range(len(rel_ok)):
-        if rel_ok[i:].all():
-            use_rel_idx = tail_start + i
-            break
-    if use_rel_idx is None:
-        use_rel_idx = tail_start
-
-    Xfit = x[use_rel_idx:]
-    Yfit = y[use_rel_idx:]
+    Xfit = x[tail_start:]
+    Yfit = y[tail_start:]
     slope, intercept = np.polyfit(Xfit, Yfit, 1)
-    return slope, intercept, use_rel_idx
+    return slope, intercept, tail_start
 
 def load_downstream_data(filepath):
     """
@@ -71,7 +55,26 @@ def voltage_to_torr_wasp_downstream(voltage):
     # Calibration from manual
     indicated_pressure = 10**((voltage - 5.5)/0.5)
 
-    return np.array([P if P >=1e-5 else P * 2.4 for P in indicated_pressure])
+    def H_correction_high(p_i):
+        """
+        pressure correction valid for 7.6*10^-3 < pressure < 76 torr
+        """
+        a = 0.3391937 
+        b = 0.8666103
+        c = 0.1400703
+        d = 0.0460218
+        e = 0.0001714538 
+        f = 0.0002287221
+
+        return a + b*p_i + c*p_i**2 + d*p_i**3 + e*p_i**4 + f*p_i**5
+
+    def H_correction_low(indicated_pressure):
+        """
+        pressure correction valid for 7.6*10^-7 < pressure < 7.6*10^-3 torr
+        """
+        return indicated_pressure * 2.4
+
+    return np.array([H_correction_low(P) if P <1e-1 else H_correction_high(P) for P in indicated_pressure])
 
 def voltage_to_torr_baratron_upstream(voltage):
     """Convert Wasp voltage to pressure in Torr."""
@@ -83,7 +86,7 @@ def voltage_to_torr_baratron_downstream(voltage):
     # Calibration from manual
     return np.array(voltage * 100 / 1000)
 
-def average_pressure_after_increase(time, pressure, window=5, slope_threshold=1e-3):
+def average_pressure_after_increase(time, pressure, window=5, slope_threshold=1e-3, tail_frac=0.25):
     """
     Detects when the pressure stabilizes after a sudden increase and 
     returns the average pressure after that time in torr.
@@ -125,11 +128,21 @@ def average_pressure_after_increase(time, pressure, window=5, slope_threshold=1e
     else:
         settled_index = int(0.5*len(time))  # fallback: halfway
 
+    tail_start = len(pressure) - int((1-tail_frac) * len(pressure))
+
     # Compute average after that point
-    avg_pressure = np.mean(pressure[settled_index:])
+    avg_pressure = np.mean(pressure[tail_start:])
     # t_start = time[settled_index]
 
     return avg_pressure
+
+def pressure_timelag(pressure, t, tau_l):
+    """
+    pressure used in calculation assuming timelag between hydrogen entering chamber and pressure reading
+    """
+    
+
+
 
 def write_run_to_csv(csv_filename, run_name, material, temperature_c, diffusivity, permeability):
     """
