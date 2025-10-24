@@ -14,7 +14,7 @@ param_keys = [
 
 fieldnames = (
     ["run", "barrier_thickness", "substrate_thickness", "T", "P_up",
-     "C1", "Cm1", "Cm2", "C2", "W", "R"]
+     "C1", "Cm1", "Cm2", "C2", "W", "R", "flux"]
     + param_keys
 )
 
@@ -72,6 +72,40 @@ def generate_params_list(base_params, S_0_limits, D_0_limits, n_points_S, n_poin
                     params["D_0_substrate"] = D_0_substrate
                     params["S_0_substrate"] = S_0_substrate
                     param_list.append(params)
+
+    return param_list
+
+def generate_params_list_P_varying(base_params, S_0_limits, D_0_limits, n_points_S, n_points_D, P_list):
+    """
+    takes in the limits for S_0 and D_0 and generates a list of parameter sets
+    that spans the space of S_0 and D_0 values
+    uses a scale with more points in the middle of the range
+
+    outputs a list of dictionaries of size n_points_R^2 * n_points_W^2
+    """
+    S_0_values = np.logspace(
+        np.log10(S_0_limits[0]),
+        np.log10(S_0_limits[1]),
+        n_points_S
+    )
+    D_0_values = np.logspace(
+        np.log10(D_0_limits[0]),
+        np.log10(D_0_limits[1]),
+        n_points_D
+    )
+
+    param_list = []
+    for S_0_barrier in S_0_values:
+        for S_0_substrate in S_0_values:
+            for D_0_barrier in D_0_values:
+                for D_0_substrate in D_0_values:
+                    for P in P_list:
+                        params = base_params.copy()
+                        params["D_0_barrier"] = D_0_barrier
+                        params["S_0_barrier"] = S_0_barrier
+                        params["D_0_substrate"] = D_0_substrate
+                        params["S_0_substrate"] = S_0_substrate
+                        param_list.append(params)
 
     return param_list
 

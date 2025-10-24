@@ -62,9 +62,9 @@ def assign_materials_and_domains(my_model, params, barrier_thickness, substrate_
         F.FixedConcentrationBC(subdomain=right, value=0, species=H),
     ]
 
-    return barrier, substrate, H
+    return barrier, substrate, left, right, H
 
-def set_exports(my_model, barrier, substrate, H, results_folder="results"):
+def set_exports(my_model, barrier, substrate, left, right, H, results_folder="results"):
     """
     sets the exports for the model
     """
@@ -76,6 +76,8 @@ def set_exports(my_model, barrier, substrate, H, results_folder="results"):
         field=H,
         subdomain=substrate,
     )
+
+    flux_right = F. SurfaceFlux(surface=right, field=H)
 
     my_model.exports = [
         F.VTXSpeciesExport(
@@ -90,9 +92,10 @@ def set_exports(my_model, barrier, substrate, H, results_folder="results"):
         ),
         barrier_export,
         substrate_export,
+        flux_right,
     ]
 
-    return barrier_export, substrate_export
+    return barrier_export, substrate_export, flux_right
 
 def compute_W_R(params, barrier_thick, substrate_thick, T, P_up):
     """
