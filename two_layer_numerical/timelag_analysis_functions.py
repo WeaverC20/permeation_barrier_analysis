@@ -68,11 +68,11 @@ def define_trapping_reactions(my_model, H, trapped_H1, trapped_H2, empty_trap1, 
         trapping_reaction_2,
     ]
 
-def settings(my_model):
+def settings(my_model, final_time):
     my_model.settings = F.Settings(
         atol=1e0,
         rtol=1e-09,
-        final_time=1.2e5,
+        final_time=final_time,
     )
 
     my_model.settings.stepsize = F.Stepsize(
