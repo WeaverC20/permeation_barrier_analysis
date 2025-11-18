@@ -74,6 +74,6 @@ def settings(my_model, final_time, milestones=[0]):
     )
 
     my_model.settings.stepsize = F.Stepsize(
-        initial_value=0.1, growth_factor=1.01, cutback_factor=0.9, target_nb_iterations=4,
+        initial_value=1, growth_factor=1.01, cutback_factor=0.05, max_stepsize=200, target_nb_iterations=4,
         milestones=milestones
     )
