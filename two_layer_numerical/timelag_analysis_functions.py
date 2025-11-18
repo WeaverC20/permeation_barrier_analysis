@@ -12,7 +12,7 @@ def define_species(my_model, w_atom_density=6.3e28):
 
     return H, trapped_H1, trapped_H2, empty_trap1, empty_trap2
 
-def define_BCs_and_initial_conditions(my_model, tungsten, substrate_thick, H):
+def define_BCs_and_initial_conditions(my_model, tungsten, substrate_thick, H, P_up):
     volume_subdomain = F.VolumeSubdomain1D(id=1, borders=(0, substrate_thick), material=tungsten)
     left_boundary = F.SurfaceSubdomain1D(id=2, x=0)
     right_boundary = F.SurfaceSubdomain1D(id=3, x=substrate_thick)
@@ -22,8 +22,6 @@ def define_BCs_and_initial_conditions(my_model, tungsten, substrate_thick, H):
         volume_subdomain,
         right_boundary,
     ]
-
-    P_up = 100000  # Pa atmospheric pressure
 
     left_bc = F.SievertsBC(
         subdomain=left_boundary,
@@ -68,7 +66,7 @@ def define_trapping_reactions(my_model, H, trapped_H1, trapped_H2, empty_trap1, 
         trapping_reaction_2,
     ]
 
-def settings(my_model, final_time):
+def settings(my_model, final_time, milestones=[0]):
     my_model.settings = F.Settings(
         atol=1e0,
         rtol=1e-09,
@@ -77,5 +75,5 @@ def settings(my_model, final_time):
 
     my_model.settings.stepsize = F.Stepsize(
         initial_value=0.1, growth_factor=1.01, cutback_factor=0.9, target_nb_iterations=4,
-        # milestones=times_input
+        milestones=milestones
     )
