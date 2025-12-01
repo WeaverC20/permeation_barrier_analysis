@@ -69,11 +69,11 @@ def define_trapping_reactions(my_model, H, trapped_H1, trapped_H2, empty_trap1, 
 def settings(my_model, final_time, milestones=[0]):
     my_model.settings = F.Settings(
         atol=1e0,
-        rtol=1e-09,
+        rtol=1e-08,
         final_time=final_time,
     )
 
     my_model.settings.stepsize = F.Stepsize(
-        initial_value=1, growth_factor=1.01, cutback_factor=0.05, max_stepsize=200, target_nb_iterations=4,
+        initial_value=5, growth_factor=1.5, cutback_factor=0.001, max_stepsize=300, target_nb_iterations=5,
         milestones=milestones
     )
