@@ -1,5 +1,6 @@
 import festim as F
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class StepsizeWithPostMilestoneControl(F.Stepsize):
@@ -113,16 +114,16 @@ def define_trapping_reactions(my_model, H, trapped_H1, trapped_H2, empty_trap1, 
         volume=volume_subdomain,
     )
 
-    # Stainless Steel
-    trapping_reaction_1 = F.Reaction(
-        reactant=[H, empty_trap1],
-        product=[trapped_H1],
-        k_0=6e16 / (atom_density),   # m^3/s
-        E_k=0.39,   # eV
-        p_0=1e13,   # s^-1
-        E_p=0.87,   # eV
-        volume=volume_subdomain,
-    )
+    # # Stainless Steel
+    # trapping_reaction_1 = F.Reaction(
+    #     reactant=[H, empty_trap1],
+    #     product=[trapped_H1],
+    #     k_0=6e16 / (atom_density),   # m^3/s
+    #     E_k=0.39,   # eV
+    #     p_0=1e13,   # s^-1
+    #     E_p=0.87,   # eV
+    #     volume=volume_subdomain,
+    # )
 
     # trapping_reaction_1 = F.Reaction(
     #     reactant=[H, empty_trap1],
@@ -163,9 +164,9 @@ def settings(my_model, final_time, growth_factor=1.05, cutback_factor=0.1, max_s
         initial_value: Initial timestep value
     """
     my_model.settings = F.Settings(
-        atol=1e1,
+        atol=1e0,
         rtol=1e-08,
-        max_iterations=300,
+        max_iterations=1000,
         final_time=final_time,
     )
 
@@ -191,3 +192,24 @@ def settings(my_model, final_time, growth_factor=1.05, cutback_factor=0.1, max_s
             target_nb_iterations=30,
             milestones=milestones
         )
+
+
+def plot_1d_mesh(vertices):
+    vertices = np.asarray(vertices)
+    spacing = np.diff(vertices)
+
+    fig, ax = plt.subplots(2, 1, figsize=(7, 4), sharex=True)
+
+    # Plot mesh points
+    ax[0].plot(vertices, np.zeros_like(vertices), 'o')
+    ax[0].set_ylabel("Mesh points")
+    ax[0].set_yticks([])
+    ax[0].set_title("1D Mesh Distribution")
+
+    # Plot spacing between points
+    ax[1].plot(vertices[:-1], spacing, '-o')
+    ax[1].set_ylabel("Δx")
+    ax[1].set_xlabel("x")
+
+    plt.tight_layout()
+    plt.show()
