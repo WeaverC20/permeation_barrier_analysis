@@ -144,14 +144,14 @@ def pressure_timelag(pressure, t, tau_l):
 
 
 
-def write_run_to_csv(csv_filename, run_name, material, temperature_c, P_up, diffusivity, permeability):
+def write_run_to_csv(csv_filename, run_name, material, temperature_c, P_up, diffusivity, permeability, flux=None):
     """
     Writes run info into the CSV file.
     If the run already exists (based on run_name), its row is updated.
     Otherwise, a new row is appended.
     """
     rows = []
-    headers = ["Run Name", "Material", "Temperature (K)", "Upstream Pressure (Torr)", "Diffusivity", "Permeability"]
+    headers = ["Run Name", "Material", "Temperature (K)", "Upstream Pressure (Torr)", "Diffusivity", "Permeability", "Flux"]
     file_exists = os.path.isfile(csv_filename)
 
     # Load existing rows if file exists
@@ -169,6 +169,7 @@ def write_run_to_csv(csv_filename, run_name, material, temperature_c, P_up, diff
             row["Upstream Pressure (Torr)"] = P_up
             row["Diffusivity"] = diffusivity
             row["Permeability"] = permeability
+            row["Flux"] = flux
             updated = True
             break
 
@@ -179,7 +180,8 @@ def write_run_to_csv(csv_filename, run_name, material, temperature_c, P_up, diff
             "Temperature (K)": temperature_c,
             "Upstream Pressure (Torr)": P_up,
             "Diffusivity": diffusivity,
-            "Permeability": permeability
+            "Permeability": permeability,
+            "Flux": flux
         })
 
     # Rewrite the file with headers + updated rows
