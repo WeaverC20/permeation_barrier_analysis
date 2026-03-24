@@ -3,7 +3,7 @@ import h_transport_materials as htm
 
 # --- parameters ---
 T = 540  # K
-e_barrier = 8e-7  # m
+e_barrier = 1e-7  # m
 e_substrate = 6.5e-4  # m
 
 # --- material properties from htm ---
