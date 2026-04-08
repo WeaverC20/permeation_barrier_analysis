@@ -605,12 +605,12 @@ def plot_regime_map(W_range=None, R_range=None):
     err_DL_clipped = np.clip(error_DL, 1e-6, 0.5)
     pcm1 = ax1.pcolormesh(W_grid, R_grid, err_DL_clipped,
                           norm=plt.matplotlib.colors.LogNorm(vmin=1e-4, vmax=0.5),
-                          cmap='viridis_r', shading='auto')
+                          cmap='RdYlGn_r', shading='auto')
     ax1.set_xscale('log')
     ax1.set_yscale('log')
-    ax1.set_xlabel('$W_1 + W_2$ (-)')
-    ax1.set_ylabel('R = K_d2/K_d1 (-)')
-    ax1.set_title('Diffusion-Limited Error\n$J^* = 1$')
+    ax1.set_xlabel('$W$', fontsize=14)
+    ax1.set_ylabel('$R$', fontsize=14)
+    ax1.set_title('Diffusion-Limited Error\n$J^* = 1$', fontsize=16)
     plt.colorbar(pcm1, ax=ax1, label='Relative Error')
     # Red contour at 5% error - this is the regime boundary
     ax1.contour(W_grid, R_grid, error_DL, levels=[0.05], colors='red', linewidths=2)
@@ -620,12 +620,12 @@ def plot_regime_map(W_range=None, R_range=None):
     err_SL_clipped = np.clip(error_SL, 1e-6, 0.5)
     pcm2 = ax2.pcolormesh(W_grid, R_grid, err_SL_clipped,
                           norm=plt.matplotlib.colors.LogNorm(vmin=1e-4, vmax=0.5),
-                          cmap='viridis_r', shading='auto')
+                          cmap='RdYlGn_r', shading='auto')
     ax2.set_xscale('log')
     ax2.set_yscale('log')
-    ax2.set_xlabel('$W_1 + W_2$ (-)')
-    ax2.set_ylabel('R = K_d2/K_d1 (-)')
-    ax2.set_title('Surface-Limited Error\n$J^* = W·R/(1+R)$')
+    ax2.set_xlabel('$W$', fontsize=14)
+    ax2.set_ylabel('$R$', fontsize=14)
+    ax2.set_title('Surface-Limited Error\n$J^* = W·R/(1+R)$', fontsize=16)
     plt.colorbar(pcm2, ax=ax2, label='Relative Error')
     ax2.contour(W_grid, R_grid, error_SL, levels=[0.05], colors='red', linewidths=2)
 
@@ -647,15 +647,15 @@ def plot_regime_map(W_range=None, R_range=None):
     pcm3 = ax3.pcolormesh(W_grid, R_grid, best_regime_masked, cmap=cmap, shading='auto', vmin=-0.5, vmax=1.5)
     ax3.set_xscale('log')
     ax3.set_yscale('log')
-    ax3.set_xlabel('$W_1 + W_2$ (-)')
-    ax3.set_ylabel('R = K_d2/K_d1 (-)')
-    ax3.set_title('Best Limiting Regime\n(white = mixed regime)')
+    ax3.set_xlabel('$W$', fontsize=14)
+    ax3.set_ylabel('$R$', fontsize=14)
+    ax3.set_title('Best Limiting Regime\n(white = mixed regime)', fontsize=16)
     cbar = plt.colorbar(pcm3, ax=ax3, ticks=[0, 1])
     cbar.ax.set_yticklabels(['DL', 'SL'])
 
-    # Dashed black contour shows where minimum error = 5%
+    # Solid black contour shows where minimum error = 5%
     # Inside this contour, at least one approximation is valid
-    ax3.contour(W_grid, R_grid, min_error, levels=[0.05], colors='black', linewidths=2, linestyles='--')
+    ax3.contour(W_grid, R_grid, min_error, levels=[0.05], colors='black', linewidths=2, linestyles='-')
 
     plt.tight_layout()
     return fig
@@ -687,9 +687,9 @@ def plot_flux_vs_W(R_values=[0.01, 0.1, 1, 10, 100]):
     ax.axhline(y=1, color='gray', linestyle='--', alpha=0.7, label='DL: $J^*=1$')
     ax.loglog(W_range, W_range * 0.5, 'k:', alpha=0.5, label='SL: $J^* ∝ W$')
 
-    ax.set_xlabel('$W_1 + W_2$ (-)', fontsize=12)
-    ax.set_ylabel('$J^*$ (-)', fontsize=12)
-    ax.set_title('Dimensionless Flux vs Permeation Parameter', fontsize=14)
+    ax.set_xlabel('$W_1 + W_2$ (-)', fontsize=14)
+    ax.set_ylabel('$J^*$ (-)', fontsize=14)
+    ax.set_title('Dimensionless Flux vs Permeation Parameter', fontsize=16)
     ax.legend(loc='lower right')
     ax.grid(True, alpha=0.3)
     ax.set_xlim([1e-4, 1e4])
@@ -741,10 +741,10 @@ def plot_error_1D(R=1.0):
     ax.loglog(W_range, err_SL, 'r-', linewidth=2, label='SL approximation ($J^*=WR/(1+R)$)')
     ax.axhline(y=0.05, color='gray', linestyle='--', label='5% error threshold')
 
-    ax.set_xlabel('$W_1 + W_2$ (-)', fontsize=12)
-    ax.set_ylabel('Relative Error (-)', fontsize=12)
-    ax.set_title(f'Relative Error vs $W_1 + W_2$ (R = {R})', fontsize=14)
-    ax.legend(loc='upper right', fontsize=9)
+    ax.set_xlabel('$W_1 + W_2$ (-)', fontsize=14)
+    ax.set_ylabel('Relative Error (-)', fontsize=14)
+    ax.set_title(f'Relative Error vs $W_1 + W_2$ (R = {R})', fontsize=16)
+    ax.legend(loc='upper right', fontsize=10)
     ax.grid(True, alpha=0.3)
     ax.set_xlim([1e-5, 1e5])
     ax.set_ylim([1e-6, 10])
@@ -843,12 +843,12 @@ def plot_regime_map_W1W2(W1_range=None, W2_range=None, R=1.0):
     err_DL_clipped = np.clip(error_DL, 1e-6, 0.5)
     pcm1 = ax1.pcolormesh(W1_grid, W2_grid, err_DL_clipped,
                           norm=plt.matplotlib.colors.LogNorm(vmin=1e-4, vmax=0.5),
-                          cmap='viridis_r', shading='auto')
+                          cmap='RdYlGn_r', shading='auto')
     ax1.set_xscale('log')
     ax1.set_yscale('log')
-    ax1.set_xlabel('$W_1$ (Layer 1 resistance)')
-    ax1.set_ylabel('$W_2$ (Layer 2 resistance)')
-    ax1.set_title(f'DL Error ($J^* = 1$), R = {R}')
+    ax1.set_xlabel('$W_1$', fontsize=14)
+    ax1.set_ylabel('$W_2$', fontsize=14)
+    ax1.set_title(f'DL Error ($J^* = 1$), R = {R}', fontsize=16)
     plt.colorbar(pcm1, ax=ax1, label='Relative Error')
     ax1.contour(W1_grid, W2_grid, error_DL, levels=[0.05], colors='red', linewidths=2)
     # Add W1=W2 line for reference
@@ -859,12 +859,12 @@ def plot_regime_map_W1W2(W1_range=None, W2_range=None, R=1.0):
     err_SL_clipped = np.clip(error_SL, 1e-6, 0.5)
     pcm2 = ax2.pcolormesh(W1_grid, W2_grid, err_SL_clipped,
                           norm=plt.matplotlib.colors.LogNorm(vmin=1e-4, vmax=0.5),
-                          cmap='viridis_r', shading='auto')
+                          cmap='RdYlGn_r', shading='auto')
     ax2.set_xscale('log')
     ax2.set_yscale('log')
-    ax2.set_xlabel('$W_1$ (Layer 1 resistance)')
-    ax2.set_ylabel('$W_2$ (Layer 2 resistance)')
-    ax2.set_title(f'SL Error ($J^* = WR/(1+R)$), R = {R}')
+    ax2.set_xlabel('$W_1$', fontsize=14)
+    ax2.set_ylabel('$W_2$', fontsize=14)
+    ax2.set_title(f'SL Error ($J^* = WR/(1+R)$), R = {R}', fontsize=16)
     plt.colorbar(pcm2, ax=ax2, label='Relative Error')
     ax2.contour(W1_grid, W2_grid, error_SL, levels=[0.05], colors='red', linewidths=2)
     ax2.plot([1e-4, 1e4], [1e-4, 1e4], 'k--', alpha=0.5)
@@ -877,9 +877,9 @@ def plot_regime_map_W1W2(W1_range=None, W2_range=None, R=1.0):
                           cmap='plasma', shading='auto')
     ax3.set_xscale('log')
     ax3.set_yscale('log')
-    ax3.set_xlabel('$W_1$ (Layer 1 resistance)')
-    ax3.set_ylabel('$W_2$ (Layer 2 resistance)')
-    ax3.set_title(f'Dimensionless Flux $J^*$, R = {R}')
+    ax3.set_xlabel('$W_1$', fontsize=14)
+    ax3.set_ylabel('$W_2$', fontsize=14)
+    ax3.set_title(f'Dimensionless Flux $J^*$, R = {R}', fontsize=16)
     plt.colorbar(pcm3, ax=ax3, label='$J^*$')
     # Contour lines for constant W = W1 + W2
     W_total = W1_grid + W2_grid
@@ -915,15 +915,15 @@ def plot_regime_map_W1W2(W1_range=None, W2_range=None, R=1.0):
                           shading='auto', vmin=-0.5, vmax=3.5)
     ax4.set_xscale('log')
     ax4.set_yscale('log')
-    ax4.set_xlabel('$W_1$ (Layer 1 resistance)')
-    ax4.set_ylabel('$W_2$ (Layer 2 resistance)')
-    ax4.set_title(f'Regime & Layer Dominance, R = {R}\n(white = mixed regime)')
+    ax4.set_xlabel('$W_1$', fontsize=14)
+    ax4.set_ylabel('$W_2$', fontsize=14)
+    ax4.set_title(f'Regime & Layer Dominance, R = {R}\n(white = mixed regime)', fontsize=16)
     cbar = plt.colorbar(pcm4, ax=ax4, ticks=[0, 1, 2, 3])
     cbar.ax.set_yticklabels(['SL/L1', 'SL/L2', 'DL/L1', 'DL/L2'])
 
     # Add regime boundary (5% error contour)
     ax4.contour(W1_grid, W2_grid, min_error, levels=[0.05],
-                colors='black', linewidths=2, linestyles='--')
+                colors='black', linewidths=2, linestyles='-')
     # Add W1=W2 line (layer dominance boundary)
     ax4.plot([1e-4, 1e4], [1e-4, 1e4], 'k-', linewidth=2, label='$W_1 = W_2$')
 
@@ -966,10 +966,10 @@ def plot_flux_vs_W1W2_slices(R=1.0):
                    label=f'$W_2$ = {W2_fixed}')
 
     ax1.axhline(y=1, color='gray', linestyle='--', alpha=0.7)
-    ax1.set_xlabel('$W_1$ (Layer 1 resistance)', fontsize=12)
-    ax1.set_ylabel('$J^*$', fontsize=12)
-    ax1.set_title(f'Flux vs $W_1$ for fixed $W_2$ (R = {R})', fontsize=14)
-    ax1.legend(loc='lower right', fontsize=9)
+    ax1.set_xlabel('$W_1$ (Layer 1 resistance)', fontsize=14)
+    ax1.set_ylabel('$J^*$', fontsize=14)
+    ax1.set_title(f'Flux vs $W_1$ for fixed $W_2$ (R = {R})', fontsize=16)
+    ax1.legend(loc='lower right', fontsize=10)
     ax1.grid(True, alpha=0.3)
     ax1.set_xlim([1e-4, 1e4])
     ax1.set_ylim([1e-5, 2])
@@ -986,10 +986,10 @@ def plot_flux_vs_W1W2_slices(R=1.0):
                    label=f'$W_1$ = {W1_fixed}')
 
     ax2.axhline(y=1, color='gray', linestyle='--', alpha=0.7)
-    ax2.set_xlabel('$W_2$ (Layer 2 resistance)', fontsize=12)
-    ax2.set_ylabel('$J^*$', fontsize=12)
-    ax2.set_title(f'Flux vs $W_2$ for fixed $W_1$ (R = {R})', fontsize=14)
-    ax2.legend(loc='lower right', fontsize=9)
+    ax2.set_xlabel('$W_2$ (Layer 2 resistance)', fontsize=14)
+    ax2.set_ylabel('$J^*$', fontsize=14)
+    ax2.set_title(f'Flux vs $W_2$ for fixed $W_1$ (R = {R})', fontsize=16)
+    ax2.legend(loc='lower right', fontsize=10)
     ax2.grid(True, alpha=0.3)
     ax2.set_xlim([1e-4, 1e4])
     ax2.set_ylim([1e-5, 2])
@@ -1032,10 +1032,10 @@ def plot_layer_contribution_analysis(R=1.0):
 
     ax1.axhline(y=1, color='gray', linestyle='--', alpha=0.7, label='DL limit')
     ax1.axvline(x=0.5, color='gray', linestyle=':', alpha=0.5)
-    ax1.set_xlabel('$W_1 / (W_1 + W_2)$ (Layer 1 fraction)', fontsize=12)
-    ax1.set_ylabel('$J^*$', fontsize=12)
+    ax1.set_xlabel('$W_1 / (W_1 + W_2)$ (Layer 1 fraction)', fontsize=14)
+    ax1.set_ylabel('$J^*$', fontsize=14)
     ax1.set_title(f'Flux vs Layer 1 Fraction (R = {R})\n'
-                  '(Note: $J^*$ depends only on total W)', fontsize=12)
+                  '(Note: $J^*$ depends only on total W)', fontsize=14)
     ax1.legend(loc='lower right')
     ax1.grid(True, alpha=0.3)
     ax1.set_xlim([0, 1])
@@ -1070,15 +1070,15 @@ def plot_layer_contribution_analysis(R=1.0):
         # Label the line
         if W_const >= 0.1:
             ax2.text(W_const * 0.7, W_const * 0.3, f'W={W_const}',
-                     color='white', fontsize=9, rotation=-45)
+                     color='white', fontsize=10, rotation=-45)
 
     # Add W1=W2 line
     ax2.plot([1e-3, 1e3], [1e-3, 1e3], 'w-', linewidth=2, label='$W_1 = W_2$')
 
-    ax2.set_xlabel('$W_1$ (Layer 1 resistance)', fontsize=12)
-    ax2.set_ylabel('$W_2$ (Layer 2 resistance)', fontsize=12)
+    ax2.set_xlabel('$W_1$ (Layer 1 resistance)', fontsize=14)
+    ax2.set_ylabel('$W_2$ (Layer 2 resistance)', fontsize=14)
     ax2.set_title(f'$J^*$ Contours with Iso-W Lines (R = {R})\n'
-                  'Dashed lines: constant $W = W_1 + W_2$', fontsize=12)
+                  'Dashed lines: constant $W = W_1 + W_2$', fontsize=14)
     ax2.set_xlim([1e-3, 1e3])
     ax2.set_ylim([1e-3, 1e3])
 
@@ -1095,28 +1095,28 @@ if __name__ == "__main__":
     # Generate and save original plots
     print("Generating regime map (W vs R)...")
     fig1 = plot_regime_map()
-    fig1.savefig(os.path.join(FIGS_DIR, 'regime_map.png'), dpi=150, bbox_inches='tight')
+    fig1.savefig(os.path.join(FIGS_DIR, 'regime_map.pdf'), dpi=150, bbox_inches='tight')
 
     print("Generating flux vs W plot...")
     fig2 = plot_flux_vs_W()
-    fig2.savefig(os.path.join(FIGS_DIR, 'flux_vs_W.png'), dpi=150, bbox_inches='tight')
+    fig2.savefig(os.path.join(FIGS_DIR, 'flux_vs_W.pdf'), dpi=150, bbox_inches='tight')
 
     print("Generating error vs W plot...")
     fig3 = plot_error_1D(R=1.0)
-    fig3.savefig(os.path.join(FIGS_DIR, 'error_vs_W.png'), dpi=150, bbox_inches='tight')
+    fig3.savefig(os.path.join(FIGS_DIR, 'error_vs_W.pdf'), dpi=150, bbox_inches='tight')
 
     # Generate new W1-W2 analysis plots
     print("Generating W1-W2 regime map...")
     fig4 = plot_regime_map_W1W2(R=1.0)
-    fig4.savefig(os.path.join(FIGS_DIR, 'regime_map_W1W2.png'), dpi=150, bbox_inches='tight')
+    fig4.savefig(os.path.join(FIGS_DIR, 'regime_map_W1W2.pdf'), dpi=150, bbox_inches='tight')
 
     print("Generating flux vs W1/W2 slices...")
     fig5 = plot_flux_vs_W1W2_slices(R=1.0)
-    fig5.savefig(os.path.join(FIGS_DIR, 'flux_vs_W1W2_slices.png'), dpi=150, bbox_inches='tight')
+    fig5.savefig(os.path.join(FIGS_DIR, 'flux_vs_W1W2_slices.pdf'), dpi=150, bbox_inches='tight')
 
     print("Generating layer contribution analysis...")
     fig6 = plot_layer_contribution_analysis(R=1.0)
-    fig6.savefig(os.path.join(FIGS_DIR, 'layer_contribution_analysis.png'), dpi=150, bbox_inches='tight')
+    fig6.savefig(os.path.join(FIGS_DIR, 'layer_contribution_analysis.pdf'), dpi=150, bbox_inches='tight')
 
     print(f"All figures saved to {FIGS_DIR}")
     plt.show()

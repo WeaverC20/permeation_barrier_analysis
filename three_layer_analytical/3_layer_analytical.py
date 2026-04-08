@@ -633,12 +633,12 @@ def plot_regime_map(W_range=None, R_range=None):
     err_DL_clipped = np.clip(error_DL, 1e-6, 0.5)
     pcm1 = ax1.pcolormesh(W_grid, R_grid, err_DL_clipped,
                           norm=plt.matplotlib.colors.LogNorm(vmin=1e-4, vmax=0.5),
-                          cmap='viridis_r', shading='auto')
+                          cmap='RdYlGn_r', shading='auto')
     ax1.set_xscale('log')
     ax1.set_yscale('log')
-    ax1.set_xlabel('$W = (W_1+W_2)(W_2+W_3)$ (-)')
-    ax1.set_ylabel('R = $K_{d3}/K_{d1}$ (-)')
-    ax1.set_title('Diffusion-Limited Error\n$J^* = 1$')
+    ax1.set_xlabel('$W$', fontsize=14)
+    ax1.set_ylabel('$R$', fontsize=14)
+    ax1.set_title('Diffusion-Limited Error\n$J^* = 1$', fontsize=16)
     plt.colorbar(pcm1, ax=ax1, label='Relative Error')
     ax1.contour(W_grid, R_grid, error_DL, levels=[0.05], colors='red', linewidths=2)
 
@@ -647,12 +647,12 @@ def plot_regime_map(W_range=None, R_range=None):
     err_SL_clipped = np.clip(error_SL, 1e-6, 0.5)
     pcm2 = ax2.pcolormesh(W_grid, R_grid, err_SL_clipped,
                           norm=plt.matplotlib.colors.LogNorm(vmin=1e-4, vmax=0.5),
-                          cmap='viridis_r', shading='auto')
+                          cmap='RdYlGn_r', shading='auto')
     ax2.set_xscale('log')
     ax2.set_yscale('log')
-    ax2.set_xlabel('$W = (W_1+W_2)(W_2+W_3)$ (-)')
-    ax2.set_ylabel('R = $K_{d3}/K_{d1}$ (-)')
-    ax2.set_title('Surface-Limited Error\n$J^* = W·R/(1+R)$')
+    ax2.set_xlabel('$W$', fontsize=14)
+    ax2.set_ylabel('$R$', fontsize=14)
+    ax2.set_title('Surface-Limited Error\n$J^* = W·R/(1+R)$', fontsize=16)
     plt.colorbar(pcm2, ax=ax2, label='Relative Error')
     ax2.contour(W_grid, R_grid, error_SL, levels=[0.05], colors='red', linewidths=2)
 
@@ -668,12 +668,12 @@ def plot_regime_map(W_range=None, R_range=None):
     pcm3 = ax3.pcolormesh(W_grid, R_grid, best_regime_masked, cmap=cmap, shading='auto', vmin=-0.5, vmax=1.5)
     ax3.set_xscale('log')
     ax3.set_yscale('log')
-    ax3.set_xlabel('$W = (W_1+W_2)(W_2+W_3)$ (-)')
-    ax3.set_ylabel('R = $K_{d3}/K_{d1}$ (-)')
-    ax3.set_title('Best Limiting Regime\n(white = mixed regime)')
+    ax3.set_xlabel('$W$', fontsize=14)
+    ax3.set_ylabel('$R$', fontsize=14)
+    ax3.set_title('Best Limiting Regime\n(white = mixed regime)', fontsize=16)
     cbar = plt.colorbar(pcm3, ax=ax3, ticks=[0, 1])
     cbar.ax.set_yticklabels(['DL', 'SL'])
-    ax3.contour(W_grid, R_grid, min_error, levels=[0.05], colors='black', linewidths=2, linestyles='--')
+    ax3.contour(W_grid, R_grid, min_error, levels=[0.05], colors='black', linewidths=2, linestyles='-')
 
     plt.tight_layout()
     return fig
@@ -704,9 +704,9 @@ def plot_flux_vs_W(R_values=[0.01, 0.1, 1, 10, 100]):
     ax.axhline(y=1, color='gray', linestyle='--', alpha=0.7, label='DL: $J^*=1$')
     ax.loglog(W_range, W_range * 0.5, 'k:', alpha=0.5, label='SL: $J^* ∝ W$')
 
-    ax.set_xlabel('$W = (W_1+W_2)(W_2+W_3)$ (-)', fontsize=12)
-    ax.set_ylabel('$J^*$ (-)', fontsize=12)
-    ax.set_title('Dimensionless Flux vs Permeation Parameter (3-Layer)', fontsize=14)
+    ax.set_xlabel('$W = (W_1+W_2)(W_2+W_3)$ (-)', fontsize=14)
+    ax.set_ylabel('$J^*$ (-)', fontsize=14)
+    ax.set_title('Dimensionless Flux vs Permeation Parameter (3-Layer)', fontsize=16)
     ax.legend(loc='lower right')
     ax.grid(True, alpha=0.3)
     ax.set_xlim([1e-4, 1e4])
@@ -753,10 +753,10 @@ def plot_error_1D(R=1.0):
     ax.loglog(W_range, err_SL, 'r-', linewidth=2, label='SL approximation ($J^*=WR/(1+R)$)')
     ax.axhline(y=0.05, color='gray', linestyle='--', label='5% error threshold')
 
-    ax.set_xlabel('$W = (W_1+W_2)(W_2+W_3)$ (-)', fontsize=12)
-    ax.set_ylabel('Relative Error (-)', fontsize=12)
-    ax.set_title(f'Relative Error vs W (3-Layer, R = {R})', fontsize=14)
-    ax.legend(loc='upper right', fontsize=9)
+    ax.set_xlabel('$W = (W_1+W_2)(W_2+W_3)$ (-)', fontsize=14)
+    ax.set_ylabel('Relative Error (-)', fontsize=14)
+    ax.set_title(f'Relative Error vs W (3-Layer, R = {R})', fontsize=16)
+    ax.legend(loc='upper right', fontsize=10)
     ax.grid(True, alpha=0.3)
     ax.set_xlim([1e-5, 1e5])
     ax.set_ylim([1e-6, 10])
@@ -829,9 +829,9 @@ def plot_regime_map_W1W3(W1_range=None, W3_range=None, W2_values=[0.01, 0.1, 1, 
                             cmap='plasma', shading='auto')
         ax.set_xscale('log')
         ax.set_yscale('log')
-        ax.set_xlabel('$W_1$ (Layer 1)')
-        ax.set_ylabel('$W_3$ (Layer 3)')
-        ax.set_title(f'$W_2$ = {W2}')
+        ax.set_xlabel('$W_1$', fontsize=14)
+        ax.set_ylabel('$W_3$', fontsize=14)
+        ax.set_title(f'$W_2$ = {W2}', fontsize=14)
 
         # Add regime boundaries
         min_error = np.minimum(error_DL_grid, error_SL_grid)
@@ -844,7 +844,7 @@ def plot_regime_map_W1W3(W1_range=None, W3_range=None, W2_values=[0.01, 0.1, 1, 
         plt.colorbar(pcm, ax=ax, label='$J^*$')
 
     plt.suptitle(f'Dimensionless Flux in $W_1$-$W_3$ Space (R = {R})\n'
-                 f'Dashed line: 5% error boundary', fontsize=12)
+                 f'Dashed line: 5% error boundary', fontsize=14)
     plt.tight_layout()
     return fig
 
@@ -887,10 +887,10 @@ def plot_middle_layer_sensitivity(W1_values=[0.1, 1, 10], W3_values=[0.1, 1, 10]
             color_idx += 1
 
     ax1.axhline(y=1, color='gray', linestyle='--', alpha=0.7, label='DL limit')
-    ax1.set_xlabel('$W_2$ (Middle Layer)', fontsize=12)
-    ax1.set_ylabel('$J^*$', fontsize=12)
-    ax1.set_title(f'Flux vs Middle Layer Resistance (R = {R})', fontsize=14)
-    ax1.legend(loc='lower right', fontsize=8)
+    ax1.set_xlabel('$W_2$ (Middle Layer)', fontsize=14)
+    ax1.set_ylabel('$J^*$', fontsize=14)
+    ax1.set_title(f'Flux vs Middle Layer Resistance (R = {R})', fontsize=16)
+    ax1.legend(loc='lower right', fontsize=9)
     ax1.grid(True, alpha=0.3)
     ax1.set_xlim([1e-4, 1e4])
     ax1.set_ylim([1e-5, 2])
@@ -908,10 +908,10 @@ def plot_middle_layer_sensitivity(W1_values=[0.1, 1, 10], W3_values=[0.1, 1, 10]
     # Reference lines
     ax2.loglog(W2_range, W2_range**2, 'k--', alpha=0.5, label='$W_2^2$ (W2 >> W1, W3)')
 
-    ax2.set_xlabel('$W_2$ (Middle Layer)', fontsize=12)
-    ax2.set_ylabel('$W = (W_1+W_2)(W_2+W_3)$', fontsize=12)
-    ax2.set_title('Total W vs Middle Layer', fontsize=14)
-    ax2.legend(loc='upper left', fontsize=8)
+    ax2.set_xlabel('$W_2$ (Middle Layer)', fontsize=14)
+    ax2.set_ylabel('$W = (W_1+W_2)(W_2+W_3)$', fontsize=14)
+    ax2.set_title('Total W vs Middle Layer', fontsize=16)
+    ax2.legend(loc='upper left', fontsize=9)
     ax2.grid(True, alpha=0.3)
     ax2.set_xlim([1e-4, 1e4])
 
@@ -951,10 +951,10 @@ def plot_flux_vs_individual_Wi(R=1.0):
         ax1.loglog(W_range, J_values, '-', color=color, linewidth=2, label=f'$W_3$={W3_fixed}')
 
     ax1.axhline(y=1, color='gray', linestyle='--', alpha=0.7)
-    ax1.set_xlabel('$W_1$ (Layer 1)', fontsize=12)
-    ax1.set_ylabel('$J^*$', fontsize=12)
-    ax1.set_title(f'$J^*$ vs $W_1$ ($W_2$={W2_fixed} fixed)', fontsize=12)
-    ax1.legend(loc='lower right', fontsize=9)
+    ax1.set_xlabel('$W_1$ (Layer 1)', fontsize=14)
+    ax1.set_ylabel('$J^*$', fontsize=14)
+    ax1.set_title(f'$J^*$ vs $W_1$ ($W_2$={W2_fixed} fixed)', fontsize=14)
+    ax1.legend(loc='lower right', fontsize=10)
     ax1.grid(True, alpha=0.3)
     ax1.set_xlim([1e-4, 1e4])
     ax1.set_ylim([1e-5, 2])
@@ -971,11 +971,11 @@ def plot_flux_vs_individual_Wi(R=1.0):
         ax2.loglog(W_range, J_values, '-', color=color, linewidth=2, label=f'$W_3$={W3_fixed}')
 
     ax2.axhline(y=1, color='gray', linestyle='--', alpha=0.7)
-    ax2.set_xlabel('$W_2$ (Middle Layer)', fontsize=12)
-    ax2.set_ylabel('$J^*$', fontsize=12)
+    ax2.set_xlabel('$W_2$ (Middle Layer)', fontsize=14)
+    ax2.set_ylabel('$J^*$', fontsize=14)
     ax2.set_title(f'$J^*$ vs $W_2$ ($W_1$={W1_fixed} fixed)\n'
-                  '(W2 appears in both terms!)', fontsize=12)
-    ax2.legend(loc='lower right', fontsize=9)
+                  '(W2 appears in both terms!)', fontsize=14)
+    ax2.legend(loc='lower right', fontsize=10)
     ax2.grid(True, alpha=0.3)
     ax2.set_xlim([1e-4, 1e4])
     ax2.set_ylim([1e-5, 2])
@@ -992,15 +992,15 @@ def plot_flux_vs_individual_Wi(R=1.0):
         ax3.loglog(W_range, J_values, '-', color=color, linewidth=2, label=f'$W_1$={W1_fixed}')
 
     ax3.axhline(y=1, color='gray', linestyle='--', alpha=0.7)
-    ax3.set_xlabel('$W_3$ (Layer 3)', fontsize=12)
-    ax3.set_ylabel('$J^*$', fontsize=12)
-    ax3.set_title(f'$J^*$ vs $W_3$ ($W_2$={W2_fixed} fixed)', fontsize=12)
-    ax3.legend(loc='lower right', fontsize=9)
+    ax3.set_xlabel('$W_3$ (Layer 3)', fontsize=14)
+    ax3.set_ylabel('$J^*$', fontsize=14)
+    ax3.set_title(f'$J^*$ vs $W_3$ ($W_2$={W2_fixed} fixed)', fontsize=14)
+    ax3.legend(loc='lower right', fontsize=10)
     ax3.grid(True, alpha=0.3)
     ax3.set_xlim([1e-4, 1e4])
     ax3.set_ylim([1e-5, 2])
 
-    plt.suptitle(f'Flux Dependence on Individual Layer Resistances (R = {R})', fontsize=14, y=1.02)
+    plt.suptitle(f'Flux Dependence on Individual Layer Resistances (R = {R})', fontsize=16, y=1.02)
     plt.tight_layout()
     return fig
 
@@ -1058,13 +1058,13 @@ def plot_iso_W_contours(R=1.0):
         # Add W1=W3 line for reference
         ax.plot([1e-3, 1e3], [1e-3, 1e3], 'w--', alpha=0.5, label='$W_1=W_3$')
 
-        ax.set_xlabel('$W_1$ (Layer 1)', fontsize=12)
-        ax.set_ylabel('$W_3$ (Layer 3)', fontsize=12)
-        ax.set_title(f'$W_2$ = {W2}', fontsize=12)
+        ax.set_xlabel('$W_1$', fontsize=14)
+        ax.set_ylabel('$W_3$', fontsize=14)
+        ax.set_title(f'$W_2$ = {W2}', fontsize=14)
         plt.colorbar(pcm, ax=ax, label='$J^*$')
 
     plt.suptitle(f'Iso-W Contours in $W_1$-$W_3$ Space (R = {R})\n'
-                 f'$W = (W_1+W_2)(W_2+W_3)$', fontsize=14)
+                 f'$W = (W_1+W_2)(W_2+W_3)$', fontsize=16)
     plt.tight_layout()
     return fig
 
@@ -1115,16 +1115,16 @@ def plot_layer_dominance_analysis(R=1.0):
         # Add W1=W3 line
         ax.plot([1e-3, 1e3], [1e-3, 1e3], 'k:', alpha=0.5)
 
-        ax.set_xlabel('$W_1$ (Layer 1)', fontsize=11)
-        ax.set_ylabel('$W_3$ (Layer 3)', fontsize=11)
-        ax.set_title(f'$W_2$ = {W2}', fontsize=12)
+        ax.set_xlabel('$W_1$', fontsize=14)
+        ax.set_ylabel('$W_3$', fontsize=14)
+        ax.set_title(f'$W_2$ = {W2}', fontsize=14)
 
         cbar = plt.colorbar(pcm, ax=ax)
-        cbar.set_label('$\\log_{10}[(W_1+W_2)/(W_2+W_3)]$', fontsize=10)
+        cbar.set_label('$\\log_{10}[(W_1+W_2)/(W_2+W_3)]$', fontsize=12)
 
     plt.suptitle(f'Term Dominance Analysis (R = {R})\n'
                  f'Red: upstream dominant, Blue: downstream dominant, '
-                 f'Black line: balanced', fontsize=12, y=1.02)
+                 f'Black line: balanced', fontsize=14, y=1.02)
     plt.tight_layout()
     return fig
 
@@ -1155,10 +1155,10 @@ def plot_comparison_2layer_vs_3layer():
     ax1.axhline(y=1, color='gray', linestyle=':', alpha=0.5)
     ax1.axvline(x=1, color='gray', linestyle=':', alpha=0.5)
 
-    ax1.set_xlabel('$W$ (-)', fontsize=12)
-    ax1.set_ylabel('$J^*$ (-)', fontsize=12)
+    ax1.set_xlabel('$W$ (-)', fontsize=14)
+    ax1.set_ylabel('$J^*$ (-)', fontsize=14)
     ax1.set_title(f'Flux vs Total W (R = {R})\n'
-                  f'(Same equation, but W definition differs)', fontsize=12)
+                  f'(Same equation, but W definition differs)', fontsize=14)
     ax1.legend(loc='lower right')
     ax1.grid(True, alpha=0.3)
     ax1.set_xlim([1e-4, 1e4])
@@ -1183,10 +1183,10 @@ def plot_comparison_2layer_vs_3layer():
         W_3layer = (W1_range + W2) * (W2 + W3)
         ax2.loglog(W1_range, W_3layer, '-', linewidth=2, label=f'3-layer: $W_2$={W2}, $W_3$={W3}')
 
-    ax2.set_xlabel('$W_1$ (-)', fontsize=12)
-    ax2.set_ylabel('Total $W$ (-)', fontsize=12)
-    ax2.set_title('W Scaling: 2-layer (additive) vs 3-layer (product)', fontsize=12)
-    ax2.legend(loc='upper left', fontsize=9)
+    ax2.set_xlabel('$W_1$ (-)', fontsize=14)
+    ax2.set_ylabel('Total $W$ (-)', fontsize=14)
+    ax2.set_title('W Scaling: 2-layer (additive) vs 3-layer (product)', fontsize=14)
+    ax2.legend(loc='upper left', fontsize=10)
     ax2.grid(True, alpha=0.3)
 
     plt.tight_layout()
@@ -1202,40 +1202,40 @@ if __name__ == "__main__":
     # Generate and save basic plots (similar to 2-layer)
     print("Generating regime map (W vs R)...")
     fig1 = plot_regime_map()
-    fig1.savefig(os.path.join(FIGS_DIR, 'regime_map.png'), dpi=150, bbox_inches='tight')
+    fig1.savefig(os.path.join(FIGS_DIR, 'regime_map.pdf'), dpi=150, bbox_inches='tight')
 
     print("Generating flux vs W plot...")
     fig2 = plot_flux_vs_W()
-    fig2.savefig(os.path.join(FIGS_DIR, 'flux_vs_W.png'), dpi=150, bbox_inches='tight')
+    fig2.savefig(os.path.join(FIGS_DIR, 'flux_vs_W.pdf'), dpi=150, bbox_inches='tight')
 
     print("Generating error vs W plot...")
     fig3 = plot_error_1D(R=1.0)
-    fig3.savefig(os.path.join(FIGS_DIR, 'error_vs_W.png'), dpi=150, bbox_inches='tight')
+    fig3.savefig(os.path.join(FIGS_DIR, 'error_vs_W.pdf'), dpi=150, bbox_inches='tight')
 
     # Generate 3-layer specific plots
     print("Generating W1-W3 regime maps for different W2...")
     fig4 = plot_regime_map_W1W3()
-    fig4.savefig(os.path.join(FIGS_DIR, 'regime_map_W1W3.png'), dpi=150, bbox_inches='tight')
+    fig4.savefig(os.path.join(FIGS_DIR, 'regime_map_W1W3.pdf'), dpi=150, bbox_inches='tight')
 
     print("Generating middle layer sensitivity analysis...")
     fig5 = plot_middle_layer_sensitivity()
-    fig5.savefig(os.path.join(FIGS_DIR, 'middle_layer_sensitivity.png'), dpi=150, bbox_inches='tight')
+    fig5.savefig(os.path.join(FIGS_DIR, 'middle_layer_sensitivity.pdf'), dpi=150, bbox_inches='tight')
 
     print("Generating flux vs individual Wi plots...")
     fig6 = plot_flux_vs_individual_Wi()
-    fig6.savefig(os.path.join(FIGS_DIR, 'flux_vs_individual_Wi.png'), dpi=150, bbox_inches='tight')
+    fig6.savefig(os.path.join(FIGS_DIR, 'flux_vs_individual_Wi.pdf'), dpi=150, bbox_inches='tight')
 
     print("Generating iso-W contour plots...")
     fig7 = plot_iso_W_contours()
-    fig7.savefig(os.path.join(FIGS_DIR, 'iso_W_contours.png'), dpi=150, bbox_inches='tight')
+    fig7.savefig(os.path.join(FIGS_DIR, 'iso_W_contours.pdf'), dpi=150, bbox_inches='tight')
 
     print("Generating layer dominance analysis...")
     fig8 = plot_layer_dominance_analysis()
-    fig8.savefig(os.path.join(FIGS_DIR, 'layer_dominance_analysis.png'), dpi=150, bbox_inches='tight')
+    fig8.savefig(os.path.join(FIGS_DIR, 'layer_dominance_analysis.pdf'), dpi=150, bbox_inches='tight')
 
     print("Generating 2-layer vs 3-layer comparison...")
     fig9 = plot_comparison_2layer_vs_3layer()
-    fig9.savefig(os.path.join(FIGS_DIR, 'comparison_2layer_vs_3layer.png'), dpi=150, bbox_inches='tight')
+    fig9.savefig(os.path.join(FIGS_DIR, 'comparison_2layer_vs_3layer.pdf'), dpi=150, bbox_inches='tight')
 
     print(f"\nAll figures saved to {FIGS_DIR}")
     plt.show()
