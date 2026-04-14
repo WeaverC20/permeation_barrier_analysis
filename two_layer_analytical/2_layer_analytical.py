@@ -604,13 +604,14 @@ def plot_regime_map(W_range=None, R_range=None):
     ax1 = axes[0]
     err_DL_clipped = np.clip(error_DL, 1e-6, 0.5)
     pcm1 = ax1.pcolormesh(W_grid, R_grid, err_DL_clipped,
-                          norm=plt.matplotlib.colors.LogNorm(vmin=1e-4, vmax=0.5),
+                          norm=plt.matplotlib.colors.LogNorm(vmin=5e-3, vmax=0.5),
                           cmap='RdYlGn_r', shading='auto')
     ax1.set_xscale('log')
     ax1.set_yscale('log')
     ax1.set_xlabel('$W$', fontsize=14)
     ax1.set_ylabel('$R$', fontsize=14)
     ax1.set_title('Diffusion-Limited Error\n$J^* = 1$', fontsize=16)
+    ax1.grid(False)
     plt.colorbar(pcm1, ax=ax1, label='Relative Error')
     # Red contour at 5% error - this is the regime boundary
     ax1.contour(W_grid, R_grid, error_DL, levels=[0.05], colors='red', linewidths=2)
@@ -619,13 +620,14 @@ def plot_regime_map(W_range=None, R_range=None):
     ax2 = axes[1]
     err_SL_clipped = np.clip(error_SL, 1e-6, 0.5)
     pcm2 = ax2.pcolormesh(W_grid, R_grid, err_SL_clipped,
-                          norm=plt.matplotlib.colors.LogNorm(vmin=1e-4, vmax=0.5),
+                          norm=plt.matplotlib.colors.LogNorm(vmin=5e-3, vmax=0.5),
                           cmap='RdYlGn_r', shading='auto')
     ax2.set_xscale('log')
     ax2.set_yscale('log')
     ax2.set_xlabel('$W$', fontsize=14)
     ax2.set_ylabel('$R$', fontsize=14)
     ax2.set_title('Surface-Limited Error\n$J^* = W·R/(1+R)$', fontsize=16)
+    ax2.grid(False)
     plt.colorbar(pcm2, ax=ax2, label='Relative Error')
     ax2.contour(W_grid, R_grid, error_SL, levels=[0.05], colors='red', linewidths=2)
 
@@ -635,22 +637,22 @@ def plot_regime_map(W_range=None, R_range=None):
     ax3 = axes[2]
     min_error = np.minimum(error_DL, error_SL)
 
-    # Create regime classification:
-    # 0 = DL valid (error < 5%), 1 = SL valid (error < 5%), NaN = mixed (neither valid)
-    best_regime = np.where(error_DL < error_SL, 0, 1)  # 0 = DL better, 1 = SL better
-    # Mask the mixed regime where neither approximation is valid
-    mixed_regime_mask = min_error >= 0.05
-    best_regime_masked = np.ma.masked_where(mixed_regime_mask, best_regime)
-
     cmap = plt.colormaps.get_cmap('RdYlBu').resampled(2)
-    cmap.set_bad(color='white')  # Mixed regime shown as white
-    pcm3 = ax3.pcolormesh(W_grid, R_grid, best_regime_masked, cmap=cmap, shading='auto', vmin=-0.5, vmax=1.5)
+    # Fill DL/SL regions using contourf so the boundary is interpolated
+    # identically to the 5% contour line below.
+    ax3.contourf(W_grid, R_grid, np.where(error_DL < error_SL, 0.0, 1.0),
+                 levels=[-0.5, 0.5, 1.5], cmap=cmap)
+    # White overlay on the mixed regime (min_error >= 5%).
+    ax3.contourf(W_grid, R_grid, min_error,
+                 levels=[0.05, np.inf], colors=['white'])
     ax3.set_xscale('log')
     ax3.set_yscale('log')
     ax3.set_xlabel('$W$', fontsize=14)
     ax3.set_ylabel('$R$', fontsize=14)
     ax3.set_title('Best Limiting Regime\n(white = mixed regime)', fontsize=16)
-    cbar = plt.colorbar(pcm3, ax=ax3, ticks=[0, 1])
+    ax3.grid(False)
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=-0.5, vmax=1.5))
+    cbar = plt.colorbar(sm, ax=ax3, ticks=[0, 1])
     cbar.ax.set_yticklabels(['DL', 'SL'])
 
     # Solid black contour shows where minimum error = 5%
@@ -689,7 +691,6 @@ def plot_flux_vs_W(R_values=[0.01, 0.1, 1, 10, 100]):
 
     ax.set_xlabel('$W_1 + W_2$ (-)', fontsize=14)
     ax.set_ylabel('$J^*$ (-)', fontsize=14)
-    ax.set_title('Dimensionless Flux vs Permeation Parameter', fontsize=16)
     ax.legend(loc='lower right')
     ax.grid(True, alpha=0.3)
     ax.set_xlim([1e-4, 1e4])

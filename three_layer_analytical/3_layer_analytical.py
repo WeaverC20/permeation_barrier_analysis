@@ -867,36 +867,11 @@ def plot_middle_layer_sensitivity(W1_values=[0.1, 1, 10], W3_values=[0.1, 1, 10]
     """
     W2_range = np.logspace(-4, 4, 100)
 
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    fig, ax2 = plt.subplots(1, 1, figsize=(7, 6))
 
-    # Panel 1: J* vs W2 for different (W1, W3) combinations
-    ax1 = axes[0]
     colors = plt.cm.tab10(np.linspace(0, 1, len(W1_values) * len(W3_values)))
-    color_idx = 0
 
-    for W1 in W1_values:
-        for W3 in W3_values:
-            J_values = []
-            for W2 in W2_range:
-                W = compute_W_total(W1, W2, W3)
-                _, _, J = solve_three_layer(W, R)
-                J_values.append(J)
-
-            ax1.loglog(W2_range, J_values, '-', color=colors[color_idx], linewidth=2,
-                       label=f'$W_1$={W1}, $W_3$={W3}')
-            color_idx += 1
-
-    ax1.axhline(y=1, color='gray', linestyle='--', alpha=0.7, label='DL limit')
-    ax1.set_xlabel('$W_2$ (Middle Layer)', fontsize=14)
-    ax1.set_ylabel('$J^*$', fontsize=14)
-    ax1.set_title(f'Flux vs Middle Layer Resistance (R = {R})', fontsize=16)
-    ax1.legend(loc='lower right', fontsize=9)
-    ax1.grid(True, alpha=0.3)
-    ax1.set_xlim([1e-4, 1e4])
-    ax1.set_ylim([1e-5, 2])
-
-    # Panel 2: Total W vs W2 showing the quadratic nature
-    ax2 = axes[1]
+    # Total W vs W2 showing the quadratic nature
     color_idx = 0
     for W1 in W1_values:
         for W3 in W3_values:
@@ -910,7 +885,6 @@ def plot_middle_layer_sensitivity(W1_values=[0.1, 1, 10], W3_values=[0.1, 1, 10]
 
     ax2.set_xlabel('$W_2$ (Middle Layer)', fontsize=14)
     ax2.set_ylabel('$W = (W_1+W_2)(W_2+W_3)$', fontsize=14)
-    ax2.set_title('Total W vs Middle Layer', fontsize=16)
     ax2.legend(loc='upper left', fontsize=9)
     ax2.grid(True, alpha=0.3)
     ax2.set_xlim([1e-4, 1e4])
@@ -1136,37 +1110,9 @@ def plot_comparison_2layer_vs_3layer():
     Shows how the flux depends on W for both formulations,
     illustrating the key difference in how layers combine.
     """
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
-    R = 1.0
+    fig, ax2 = plt.subplots(1, 1, figsize=(7, 6))
 
-    # Panel 1: J* vs total W
-    ax1 = axes[0]
-    W_range = np.logspace(-4, 4, 100)
-
-    J_values = []
-    for W in W_range:
-        _, _, J = solve_three_layer(W, R)
-        J_values.append(J)
-
-    ax1.loglog(W_range, J_values, 'b-', linewidth=2, label='Full solution')
-    ax1.loglog(W_range, [flux_DL(W, R) for W in W_range], 'g--', linewidth=2, label='DL: $J^*=1$')
-    ax1.loglog(W_range, [flux_SL(W, R) for W in W_range], 'r--', linewidth=2, label=f'SL: $J^*=WR/(1+R)$')
-
-    ax1.axhline(y=1, color='gray', linestyle=':', alpha=0.5)
-    ax1.axvline(x=1, color='gray', linestyle=':', alpha=0.5)
-
-    ax1.set_xlabel('$W$ (-)', fontsize=14)
-    ax1.set_ylabel('$J^*$ (-)', fontsize=14)
-    ax1.set_title(f'Flux vs Total W (R = {R})\n'
-                  f'(Same equation, but W definition differs)', fontsize=14)
-    ax1.legend(loc='lower right')
-    ax1.grid(True, alpha=0.3)
-    ax1.set_xlim([1e-4, 1e4])
-    ax1.set_ylim([1e-5, 2])
-
-    # Panel 2: How W depends on individual contributions
-    ax2 = axes[1]
-
+    # How W depends on individual contributions
     # For 2-layer: W = W1 + W2 (lines are straight in log-log)
     # For 3-layer: W = (W1+W2)(W2+W3) (more complex)
 
@@ -1185,7 +1131,6 @@ def plot_comparison_2layer_vs_3layer():
 
     ax2.set_xlabel('$W_1$ (-)', fontsize=14)
     ax2.set_ylabel('Total $W$ (-)', fontsize=14)
-    ax2.set_title('W Scaling: 2-layer (additive) vs 3-layer (product)', fontsize=14)
     ax2.legend(loc='upper left', fontsize=10)
     ax2.grid(True, alpha=0.3)
 
