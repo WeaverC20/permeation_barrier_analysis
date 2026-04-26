@@ -61,4 +61,5 @@ def plot_steel(dataset, x_range=[0.00075, 0.00275]):
     plt.tight_layout()
     plt.show()
 
-plot_steel(steel_dataset)
+if __name__ == "__main__":
+    plot_steel(steel_dataset)
