@@ -365,7 +365,7 @@ def plot_error_1D(R=1.0):
 
 
 def plot_regime_map_W1W3(W1_range=None, W3_range=None,
-                         W2_values=(0.01, 0.1, 1, 10), R=1.0):
+                         W2_values=(1e-3, 1e-1, 1e1, 1e3), R=1.0):
     """
     Approximation-error map in (W_1, W_3) space at several fixed W_2 values.
 
@@ -401,9 +401,11 @@ def plot_regime_map_W1W3(W1_range=None, W3_range=None,
                     err_SL_grid[i, j] = np.nan
 
         min_error = np.minimum(err_DL_grid, err_SL_grid)
+        # Centre the LogNorm so the 5% contour sits at the yellow midpoint:
+        # geometric mean(vmin, vmax) = sqrt(5e-3 * 0.5) = 0.05.
         err_clipped = np.clip(min_error, 1e-4, 1.0)
         pcm = ax.pcolormesh(W1_grid, W3_grid, err_clipped,
-                            norm=plt.matplotlib.colors.LogNorm(vmin=1e-3, vmax=1.0),
+                            norm=plt.matplotlib.colors.LogNorm(vmin=5e-3, vmax=0.5),
                             cmap='RdYlGn_r', shading='auto')
         ax.set_xscale('log')
         ax.set_yscale('log')

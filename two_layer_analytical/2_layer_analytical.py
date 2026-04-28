@@ -135,7 +135,11 @@ import matplotlib.pyplot as plt
 import os
 
 # Create figs directory if it doesn't exist
-FIGS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'figs')
+FIGS_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    '..', 'ShieldRunsAnalysis', 'results', 'figs', 'PRF_analysis'
+)
+FIGS_DIR = os.path.abspath(FIGS_DIR)
 os.makedirs(FIGS_DIR, exist_ok=True)
 
 
@@ -579,29 +583,19 @@ def compute_regime_map(W_range, R_range):
 
 def plot_regime_map(W_range=None, R_range=None):
     """
-    Plot regime map: W vs R showing where DL and SL approximations are valid.
-
-    This creates three panels similar to Figure 2/6 in Alberghi et al.:
-        1. DL error map: shows where J* = 1 is a good approximation
-        2. SL error map: shows where J* = W·R/(1+R) is a good approximation
-        3. Best regime: shows which approximation has lower error at each point
-
-    The red contour lines mark the 5% error boundary.
+    DL and SL approximation-error maps in (W, R) space, side by side.
+    The 5% error boundary is overlaid in red.
     """
     if W_range is None:
         W_range = np.logspace(-6, 6, 100)
     if R_range is None:
         R_range = np.logspace(-6, 6, 100)
 
-    # Compute errors across the parameter space
-    W_grid, R_grid, error_DL, error_SL, J_full = compute_regime_map(W_range, R_range)
+    W_grid, R_grid, error_DL, error_SL, _ = compute_regime_map(W_range, R_range)
 
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
-    # Panel 1: DL approximation error
-    # Dark purple = low error (DL approximation valid)
-    # Yellow = high error (DL approximation fails)
-    ax1 = axes[0]
+    ax1, ax2 = axes
     err_DL_clipped = np.clip(error_DL, 1e-6, 0.5)
     pcm1 = ax1.pcolormesh(W_grid, R_grid, err_DL_clipped,
                           norm=plt.matplotlib.colors.LogNorm(vmin=5e-3, vmax=0.5),
@@ -611,13 +605,9 @@ def plot_regime_map(W_range=None, R_range=None):
     ax1.set_xlabel('$W$', fontsize=14)
     ax1.set_ylabel('$R$', fontsize=14)
     ax1.set_title('Diffusion-Limited Error\n$J^* = 1$', fontsize=16)
-    ax1.grid(False)
     plt.colorbar(pcm1, ax=ax1, label='Relative Error')
-    # Red contour at 5% error - this is the regime boundary
     ax1.contour(W_grid, R_grid, error_DL, levels=[0.05], colors='red', linewidths=2)
 
-    # Panel 2: SL approximation error
-    ax2 = axes[1]
     err_SL_clipped = np.clip(error_SL, 1e-6, 0.5)
     pcm2 = ax2.pcolormesh(W_grid, R_grid, err_SL_clipped,
                           norm=plt.matplotlib.colors.LogNorm(vmin=5e-3, vmax=0.5),
@@ -627,37 +617,45 @@ def plot_regime_map(W_range=None, R_range=None):
     ax2.set_xlabel('$W$', fontsize=14)
     ax2.set_ylabel('$R$', fontsize=14)
     ax2.set_title('Surface-Limited Error\n$J^* = W·R/(1+R)$', fontsize=16)
-    ax2.grid(False)
     plt.colorbar(pcm2, ax=ax2, label='Relative Error')
     ax2.contour(W_grid, R_grid, error_SL, levels=[0.05], colors='red', linewidths=2)
 
-    # Panel 3: Best regime map
-    # Shows which approximation is better at each point
-    # White = mixed regime (neither approximation valid at 5%)
-    ax3 = axes[2]
+    plt.tight_layout()
+    return fig
+
+
+def plot_best_regime_map(W_range=None, R_range=None):
+    """
+    Best-limiting-regime map (DL vs SL) in (W, R) space, on its own figure.
+    White overlay marks the mixed regime (where neither approximation is
+    accurate to 5%). Black contour is the 5% error boundary.
+    """
+    if W_range is None:
+        W_range = np.logspace(-6, 6, 100)
+    if R_range is None:
+        R_range = np.logspace(-6, 6, 100)
+
+    W_grid, R_grid, error_DL, error_SL, _ = compute_regime_map(W_range, R_range)
     min_error = np.minimum(error_DL, error_SL)
 
+    fig, ax = plt.subplots(figsize=(8, 7))
     cmap = plt.colormaps.get_cmap('RdYlBu').resampled(2)
-    # Fill DL/SL regions using contourf so the boundary is interpolated
-    # identically to the 5% contour line below.
-    ax3.contourf(W_grid, R_grid, np.where(error_DL < error_SL, 0.0, 1.0),
-                 levels=[-0.5, 0.5, 1.5], cmap=cmap)
-    # White overlay on the mixed regime (min_error >= 5%).
-    ax3.contourf(W_grid, R_grid, min_error,
-                 levels=[0.05, np.inf], colors=['white'])
-    ax3.set_xscale('log')
-    ax3.set_yscale('log')
-    ax3.set_xlabel('$W$', fontsize=14)
-    ax3.set_ylabel('$R$', fontsize=14)
-    ax3.set_title('Best Limiting Regime\n(white = mixed regime)', fontsize=16)
-    ax3.grid(False)
+    ax.contourf(W_grid, R_grid, np.where(error_DL < error_SL, 0.0, 1.0),
+                levels=[-0.5, 0.5, 1.5], cmap=cmap)
+    ax.contourf(W_grid, R_grid, min_error,
+                levels=[0.05, np.inf], colors=['white'])
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.set_xlabel('$W$', fontsize=14)
+    ax.set_ylabel('$R$', fontsize=14)
+    ax.set_title('Best Limiting Regime\n(white = mixed regime)', fontsize=16)
+
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=-0.5, vmax=1.5))
-    cbar = plt.colorbar(sm, ax=ax3, ticks=[0, 1])
+    cbar = plt.colorbar(sm, ax=ax, ticks=[0, 1])
     cbar.ax.set_yticklabels(['DL', 'SL'])
 
-    # Solid black contour shows where minimum error = 5%
-    # Inside this contour, at least one approximation is valid
-    ax3.contour(W_grid, R_grid, min_error, levels=[0.05], colors='black', linewidths=2, linestyles='-')
+    ax.contour(W_grid, R_grid, min_error, levels=[0.05],
+               colors='black', linewidths=2)
 
     plt.tight_layout()
     return fig
@@ -942,6 +940,10 @@ if __name__ == "__main__":
     print("Generating regime map (W vs R)...")
     fig1 = plot_regime_map()
     fig1.savefig(os.path.join(FIGS_DIR, 'regime_map.pdf'), dpi=150, bbox_inches='tight')
+
+    print("Generating best limiting regime map...")
+    fig_best = plot_best_regime_map()
+    fig_best.savefig(os.path.join(FIGS_DIR, 'best_regime_map.pdf'), dpi=150, bbox_inches='tight')
 
     print("Generating flux vs W plot...")
     fig2 = plot_flux_vs_W()
