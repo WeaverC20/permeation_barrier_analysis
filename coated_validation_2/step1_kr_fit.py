@@ -41,6 +41,7 @@ os.makedirs(FIGDIR, exist_ok=True)
 
 TARGET = os.path.join(HERE, 'target_flux.json')
 BEST   = os.path.join(HERE, 'festim_best_transient.json')
+SWEEP  = os.path.join(HERE, 'festim_sweep_traces.json')
 
 
 def _load_and_baseline_trace():
@@ -129,22 +130,56 @@ def main():
           f'(rel. err {(fit["J_FESTIM_at_fit_mol"]/fit["J_target_mol"]-1)*100:+.1f} %)')
 
     fig, ax = plt.subplots(figsize=(10, 6.5))
+
+    # plot the sweep of worse fits underneath, in light grey
+    other_color = '#bdbdbd'
+    if os.path.exists(SWEEP):
+        sweep_payload = json.load(open(SWEEP))
+        best_E = fit['E_K_r']
+        # drop the best-fit entry, then keep every other one (~half as many)
+        others = [e for e in sweep_payload.get('sweep', [])
+                  if abs(e['E_K_r'] - best_E) >= 1e-6]
+        others = others[::2]
+        # cut the sweep traces a bit shorter than the best fit
+        t_cut_s = float(t_p[-1]) * 0.92
+        for entry in others:
+            t_e = np.array(entry['t_s'])
+            J_e = np.array(entry['J_atomH'])
+            mask = t_e <= t_cut_s
+            t_e, J_e = t_e[mask], J_e[mask]
+            _, P_e = _integrate_to_pressure(t_e, J_e, T_K)
+            ax.plot(t_e / 3600, P_e, color=other_color, lw=0.9, zorder=1.5)
+
     ax.plot(t_obs / 3600, P_obs0, color='k', lw=1.7,
-            label='SHIELD measured (baseline-subtracted)')
+            label='SHIELD measured (baseline-subtracted)', zorder=3)
     # show the linear-fit asymptote
     t_line = np.linspace(0, max(t_obs[-1], t_p[-1]) / 3600, 50)
     ax.plot(t_line, slope_meas * t_line * 3600 + intercept_meas,
             ls=':', color='gray', lw=1.4,
             label=f'linear fit of measured trace, slope = '
-                  f'{slope_meas*3600:.3f} Pa/h')
+                  f'{slope_meas*3600:.3f} Pa/h', zorder=2.5)
     ax.plot(t_p / 3600, P_pred, color='red', lw=2.0,
             label=f'best-fit FESTIM SurfaceReaction\n'
                   f'$K_{{r,0}}$ = {fit["K_r_0_mol"]:.2e} m$^4$/(mol·s),  '
-                  f'$E_{{K_r}}$ = {fit["E_K_r"]:.2f} eV')
+                  f'$E_{{K_r}}$ = {fit["E_K_r"]:.2f} eV', zorder=4)
     ax.set_xlabel('time since v3-open (hours)', fontsize=12)
     ax.set_ylabel('downstream P (Pa, baseline-subtracted)', fontsize=12)
     ax.tick_params(labelsize=11)
-    ax.set_xlim(-0.3, min(t_obs[-1] / 3600, max(t_p[-1] / 3600 * 1.05, 6)))
+
+    # tighten the axes to the best-fit range so the red curve fills the frame
+    t_end_h = float(t_p[-1] / 3600)
+    P_max   = float(np.max(P_pred))
+    ax.set_xlim(-0.03 * t_end_h, 1.02 * t_end_h)
+    ax.set_ylim(-0.05 * P_max,    1.15 * P_max)
+
+    # text annotations identifying the curves on the plot itself
+    ax.text(t_end_h * 0.98, P_pred[-1] * 1.02, 'best fit',
+            color='red', fontsize=11, fontweight='bold',
+            ha='right', va='bottom')
+    ax.text(t_end_h * 0.05, P_max * 1.10, 'other fits ($E_{K_r}$ sweep)',
+            color='#7a7a7a', fontsize=11, fontstyle='italic',
+            ha='left', va='center')
+
     ax.legend(loc='lower right', fontsize=10, framealpha=0.95)
     ax.grid(True, alpha=0.3)
     fig.tight_layout()

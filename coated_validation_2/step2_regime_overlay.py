@@ -82,13 +82,13 @@ def main():
                   fontsize=14)
     ax.set_ylabel('$R = K_{d2}/K_{d1}$', fontsize=14)
     ax.tick_params(labelsize=12)
-    # SL / DL labels in the lower corners (out of the way of run markers)
+    # SL / DL / mixed regime labels
     ax.text(W_AXIS[0] * 5, R_AXIS[0] * 3, 'SL', fontsize=22, color='navy',
             alpha=0.7, fontweight='bold', ha='left', va='bottom')
-    ax.text(W_AXIS[1] / 5, R_AXIS[0] * 3, 'DL', fontsize=22, color='darkred',
-            alpha=0.7, fontweight='bold', ha='right', va='bottom')
-    ax.text(1.0, R_AXIS[0] * 3, 'mixed', fontsize=14, color='gray',
-            alpha=0.85, ha='center', va='bottom')
+    ax.text(W_AXIS[1] / 5, 1.0, 'DL', fontsize=22, color='darkred',
+            alpha=0.7, fontweight='bold', ha='right', va='center')
+    ax.text(W_AXIS[1] / 5, R_AXIS[0] * 3, 'mixed', fontsize=14, color='gray',
+            alpha=0.85, ha='right', va='bottom')
     ax.grid(True, which='both', alpha=0.2, linewidth=0.5)
 
     # ---- runs ---------------------------------------------------------------
@@ -104,8 +104,7 @@ def main():
                    edgecolor='k', linewidth=1.5, zorder=5)
         T_C = r.T - 273.15
         ox, oy = label_offsets[j % len(label_offsets)]
-        ax.annotate(f'{r.name.split("/")[0]}\n'
-                    f'T={T_C:.0f}°C, p={r.p_up_Pa/133.322:.0f} Torr',
+        ax.annotate(f'T={T_C:.0f}°C, p={r.p_up_Pa/133.322:.0f} Torr',
                     (Wv, Rv), xytext=(ox, oy),
                     textcoords='offset points', fontsize=10,
                     arrowprops=dict(arrowstyle='-', color='black',

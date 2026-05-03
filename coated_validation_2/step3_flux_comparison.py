@@ -161,6 +161,103 @@ def _plot_group(rows, fname):
     print(f'wrote {fname}')
 
 
+def _plot_lollipop_single(row, fname, j_sub_frac_err=0.20):
+    """Lollipop chart for a single SHIELD run.
+
+    J_bare and J_SHIELD measured are drawn as horizontal dashed lines with
+    shaded uncertainty bands; J_DL, J_SL, J_full, J_FESTIM are lollipops
+    rooted at the J_SHIELD baseline. A two-headed arrow between the bare
+    and measured bands carries the PRF.
+    """
+    fig, ax = plt.subplots(figsize=(11, 7.5))
+    x_center = 0.0
+    half_w   = 0.45
+
+    sub_color    = '#555555'
+    DL_color     = 'dodgerblue'
+    SL_color     = 'rebeccapurple'
+    full_color   = 'seagreen'
+    festim_color = 'crimson'
+    obs_color    = 'darkorange'
+
+    j_sub     = row['J_sub']
+    j_obs     = row['J_obs']
+    j_obs_err = row['J_obs_err']
+    j_sub_err = j_sub * j_sub_frac_err   # representative literature spread
+
+    # bare-substrate band
+    ax.hlines(j_sub, xmin=x_center - half_w, xmax=x_center + half_w,
+              color=sub_color, ls='--', lw=2.2, alpha=0.85)
+    ax.fill_between([x_center - half_w, x_center + half_w],
+                    j_sub - j_sub_err, j_sub + j_sub_err,
+                    color=sub_color, alpha=0.28)
+    ax.text(x_center + half_w + 0.03, j_sub,
+            r'$J$ bare substrate', color=sub_color,
+            va='center', fontsize=13, fontweight='bold')
+
+    # SHIELD-measured band
+    ax.hlines(j_obs, xmin=x_center - half_w, xmax=x_center + half_w,
+              color=obs_color, ls='--', lw=2.2, alpha=0.9)
+    ax.fill_between([x_center - half_w, x_center + half_w],
+                    j_obs - j_obs_err, j_obs + j_obs_err,
+                    color=obs_color, alpha=0.32)
+    ax.text(x_center + half_w + 0.03, j_obs,
+            r'$J_{SHIELD}$ measured', color=obs_color,
+            va='center', fontsize=13, fontweight='bold')
+
+    # lollipops rooted at the SHIELD baseline
+    cats = [
+        ('J$_{DL}$ analytical',           row['J_DL'],     DL_color),
+        ('J$_{SL}$ analytical',           row['J_SL'],     SL_color),
+        ('J$_{full}$ 2-layer quartic',    row['J_full'],   full_color),
+        ('J$_{FESTIM}$ SurfaceReaction',  row['J_FESTIM'], festim_color),
+    ]
+    offsets = np.linspace(-0.3, 0.3, len(cats))
+    for offs, (lab, val, col) in zip(offsets, cats):
+        x = x_center + offs
+        markerline, stemlines, _ = ax.stem(
+            [x], [val], bottom=j_obs, basefmt=' ')
+        plt.setp(stemlines, color=col, linewidth=3.2, alpha=0.9)
+        plt.setp(markerline, marker='o', markerfacecolor=col,
+                 markeredgecolor='black', markeredgewidth=1.4,
+                 markersize=16, zorder=3, label=lab)
+
+    # PRF arrow spanning the two bands
+    prf = j_sub / j_obs
+    arrow_x = x_center - half_w + 0.05
+    ax.annotate('', xy=(arrow_x, j_sub * 0.97),
+                xytext=(arrow_x, j_obs * 1.03),
+                arrowprops=dict(arrowstyle='<|-|>', color='black',
+                                lw=2.2, mutation_scale=22))
+    geom_mid = float(np.sqrt(j_sub * j_obs))
+    ax.text(arrow_x - 0.03, geom_mid, f'PRF = {prf:.1f}',
+            ha='right', va='center', fontsize=14, fontweight='bold',
+            bbox=dict(boxstyle='round,pad=0.3', facecolor='white',
+                      edgecolor='black', alpha=0.85))
+
+    ax.set_yscale('log')
+    pos = np.array([row[k] for k in
+                    ('J_sub', 'J_DL', 'J_SL', 'J_full', 'J_obs', 'J_FESTIM')])
+    pos = pos[np.isfinite(pos) & (pos > 0)]
+    ax.set_ylim(pos.min() / 5, pos.max() * 5)
+    ax.set_xticks([x_center])
+    ax.set_xticklabels([f'T = {row["run"].T-273.15:.0f}°C, '
+                        f'p = {row["run"].p_up_Pa/133.322:.0f} Torr'],
+                       fontsize=13, fontweight='bold')
+    ax.set_xlim(x_center - 0.75, x_center + 1.0)
+    ax.set_ylabel(r'Permeation flux $J$  [mol H atoms / m$^2$ / s]',
+                  fontsize=13)
+    ax.tick_params(axis='y', labelsize=12)
+    ax.grid(True, which='both', axis='y', alpha=0.25)
+    ax.grid(False, axis='x')
+    ax.legend(loc='upper right', fontsize=12, framealpha=0.95,
+              markerscale=0.9, borderpad=0.7)
+    fig.tight_layout()
+    out = os.path.join(FIGDIR, fname)
+    fig.savefig(out, dpi=160, bbox_inches='tight')
+    print(f'wrote {fname}')
+
+
 def _print_table(rows, header):
     print(f'\n=== {header} ===')
     print(f'{"run":24s} {"T(K)":>6s} {"p(Pa)":>10s} '
@@ -193,8 +290,9 @@ def main():
     _plot_group(rows_275, 'step3_flux_comparison_275C.pdf')
     _plot_group(rows_324, 'step3_flux_comparison_324C.pdf')
 
-    # back-compat: also save the 275C plot as the original filename
-    _plot_group(rows_275, 'step3_flux_comparison.pdf')
+    # Lollipop comparison for the 03.23 (389 Torr) run only.
+    row_0323 = next(r for r in rows_275 if r['run'].name.startswith('03.23'))
+    _plot_lollipop_single(row_0323, 'step3_flux_comparison.pdf')
 
     _print_table(rows_275, '274.6 °C runs')
     _print_table(rows_324, '324 °C runs')
