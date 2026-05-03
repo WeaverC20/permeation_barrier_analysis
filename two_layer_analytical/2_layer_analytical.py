@@ -134,12 +134,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-# Create figs directory if it doesn't exist
-FIGS_DIR = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    '..', 'ShieldRunsAnalysis', 'results', 'figs', 'PRF_analysis'
-)
-FIGS_DIR = os.path.abspath(FIGS_DIR)
+# Save figures to the local figs/ folder next to this script
+FIGS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'figs')
 os.makedirs(FIGS_DIR, exist_ok=True)
 
 
@@ -620,6 +616,11 @@ def plot_regime_map(W_range=None, R_range=None):
     plt.colorbar(pcm2, ax=ax2, label='Relative Error')
     ax2.contour(W_grid, R_grid, error_SL, levels=[0.05], colors='red', linewidths=2)
 
+    # Eliminate the thin white seams between mesh cells in the saved PDF.
+    for ax_ in (ax1, ax2):
+        for col in ax_.collections:
+            col.set_edgecolor('face')
+
     plt.tight_layout()
     return fig
 
@@ -657,6 +658,10 @@ def plot_best_regime_map(W_range=None, R_range=None):
     ax.contour(W_grid, R_grid, min_error, levels=[0.05],
                colors='black', linewidths=2)
 
+    # Eliminate the thin white seams between contourf cells in the saved PDF.
+    for col in ax.collections:
+        col.set_edgecolor('face')
+
     plt.tight_layout()
     return fig
 
@@ -668,11 +673,14 @@ def plot_flux_vs_W(R_values=[0.01, 0.1, 1, 10, 100]):
     This shows how the flux transitions from surface-limited (J* ∝ W)
     to diffusion-limited (J* → 1) as W increases.
     """
+    from labellines import labelLines
+
     W_range = np.logspace(-4, 4, 100)
 
     fig, ax = plt.subplots(figsize=(10, 7))
 
     colors = plt.cm.viridis(np.linspace(0, 1, len(R_values)))
+    R_lines = []
 
     for R, color in zip(R_values, colors):
         J_full = []
@@ -681,18 +689,30 @@ def plot_flux_vs_W(R_values=[0.01, 0.1, 1, 10, 100]):
             _, _, J = solve_two_layer(W, R)
             J_full.append(J)
 
-        ax.loglog(W_range, J_full, '-', color=color, linewidth=2, label=f'R = {R}')
+        line, = ax.loglog(W_range, J_full, '-', color=color, linewidth=2,
+                          label=f'R = {R}')
+        R_lines.append(line)
 
     # Reference lines for limiting regimes
-    ax.axhline(y=1, color='gray', linestyle='--', alpha=0.7, label='DL: $J^*=1$')
-    ax.loglog(W_range, W_range * 0.5, 'k:', alpha=0.5, label='SL: $J^* ∝ W$')
+    ref_DL = ax.axhline(y=1, color='gray', linestyle='--', alpha=0.7,
+                        label='DL: $J^*=1$')
+    ref_SL, = ax.loglog(W_range, W_range * 0.5, 'k:', alpha=0.5,
+                        label='SL: $J^* ∝ W$')
 
     ax.set_xlabel('$W_1 + W_2$ (-)', fontsize=14)
     ax.set_ylabel('$J^*$ (-)', fontsize=14)
-    ax.legend(loc='lower right')
     ax.grid(True, alpha=0.3)
     ax.set_xlim([1e-4, 1e4])
     ax.set_ylim([1e-5, 10])
+
+    # Inline R-value labels placed on the curves themselves (matplotlib-label-lines).
+    # Stagger the x positions of the labels so they don't overlap.
+    label_xs = np.logspace(-2.5, 2.5, len(R_lines))
+    labelLines(R_lines, xvals=label_xs, fontsize=11, zorder=2.5,
+               outline_color='white', outline_width=4)
+
+    # Legend now only carries the limiting-regime references (R values are inline).
+    ax.legend(handles=[ref_DL, ref_SL], loc='lower right')
 
     return fig
 
@@ -732,18 +752,27 @@ def plot_error_1D(R=1.0):
     # Shade only where each approximation is valid (error < 5%)
     # Use fill_between with a where condition based on actual error values
     ax.fill_between(W_range, 1e-6, 10, where=(err_SL < 0.05),
-                    alpha=0.2, color='red', label='SL regime (<5% error)')
+                    alpha=0.2, color='red')
     ax.fill_between(W_range, 1e-6, 10, where=(err_DL < 0.05),
-                    alpha=0.2, color='blue', label='DL regime (<5% error)')
+                    alpha=0.2, color='blue')
 
     ax.loglog(W_range, err_DL, 'b-', linewidth=2, label='DL approximation ($J^*=1$)')
     ax.loglog(W_range, err_SL, 'r-', linewidth=2, label='SL approximation ($J^*=WR/(1+R)$)')
-    ax.axhline(y=0.05, color='gray', linestyle='--', label='5% error threshold')
+    ax.axhline(y=0.05, color='gray', linestyle='--')
+
+    # in-plot regime labels (replace SL/DL legend entries)
+    ax.text(1e-4, 3, 'SL', fontsize=22, color='darkred',
+            fontweight='bold', alpha=0.8, ha='center', va='center')
+    ax.text(1e3, 3, 'DL', fontsize=22, color='navy',
+            fontweight='bold', alpha=0.8, ha='center', va='center')
+    # 5% threshold annotation, placed just under the dashed line at W = 10
+    ax.text(10, 0.03, '5%', fontsize=11, color='gray',
+            ha='center', va='top')
 
     ax.set_xlabel('$W_1 + W_2$ (-)', fontsize=14)
     ax.set_ylabel('Relative Error (-)', fontsize=14)
     ax.set_title(f'Relative Error vs $W_1 + W_2$ (R = {R})', fontsize=16)
-    ax.legend(loc='upper right', fontsize=10)
+    ax.legend(loc='lower right', fontsize=10)
     ax.grid(True, alpha=0.3)
     ax.set_xlim([1e-5, 1e5])
     ax.set_ylim([1e-6, 10])

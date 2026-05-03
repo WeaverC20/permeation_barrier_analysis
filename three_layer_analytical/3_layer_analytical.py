@@ -428,10 +428,11 @@ def plot_regime_map_W1W3(W1_range=None, W3_range=None,
         cbar = plt.colorbar(pcm, ax=ax)
         cbar.set_label('Relative error of best approximation')
 
-    plt.suptitle(f'Approximation-error map in ($W_1$, $W_3$) space (R = {R})\n'
-                 'Green = approximation works, red = mixed regime. '
-                 'Cyan: iso-W contours. Black: 5% error boundary.',
-                 fontsize=13)
+    # Eliminate the thin white seams between mesh cells in the saved PDF.
+    for ax in axes:
+        for col in ax.collections:
+            col.set_edgecolor('face')
+
     plt.tight_layout()
     return fig
 
